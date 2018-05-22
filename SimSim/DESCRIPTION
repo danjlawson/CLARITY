@@ -1,0 +1,10 @@
+Package: SimSim
+Title: Compare Similarity matrices using non-parametric mixtures
+Version: 0.0.0.9000
+Authors@R: person("Daniel", "Lawson", email = "dan.lawson@bristol.ac.uk", role = c("aut", "cre"))
+Description: SimSim ("Similarity of Similarity Matrices") compares two matrices in their structural components, that is, the set of elements that share features that add to their similarity.
+Depends: R (>= 3.3.2)
+License: LicenseRef-LICENCE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1.9000
