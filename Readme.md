@@ -1,2 +1,2 @@
-# SimSim: An R package for comparing Similarity Matrices
+# Clarity: An R package for Comparing SimiLARITY Matrices
 
