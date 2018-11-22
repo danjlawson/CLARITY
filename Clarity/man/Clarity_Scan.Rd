@@ -30,7 +30,14 @@ Clarity_Scan(Y, kmax = 20, clist = NULL, niter = 10, thresh = 0.1,
 \item{...}{futher parameters to be passed to \code{\link{Clarity_fixedK}}}
 }
 \value{
-An object of class "ClarityScan", which is a list of length (kmax-1), each containing an object of class "Clarity" as described in \code{\link{Clarity_fixedK}} (for K=2..kmax)
+An object of class "ClarityScan", which is a list containing the following:
+\itemize{
+\item scan A list of length (kmax)-1, each containing an object of class "Clarity" as described in \code{\link{Clarity_fixedK}} (for K=2..kmax)
+\item objectives A vector of length (kmax)-1, the objective function at each K
+\item klist The list of K evaluated at, K=2..kmax
+\item Y The data Y provided
+\item kmax The maximum K requested
+}
 }
 \description{
 Learn a mixture model representation of a provided similarity matrix Y using Clarity. You may either choose the maximum number of components to use, kmax, or provide a pre-existing list of

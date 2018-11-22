@@ -7,7 +7,8 @@
 Clarity_fixedK(Y, K = NULL, tmax = 10000, matrixdistmin = 1e-08,
   objectivedistmin = 0.001, printskip = 100, verbose = TRUE,
   updateA = TRUE, updateX = TRUE, A = NULL, X = NULL, a = 0.9,
-  sigma = 1e-04, sigmaY = 1e-05, fixed = NULL)
+  sigma = 1e-04, sigmaY = 1e-05, ensurepositive = TRUE,
+  fixed = NULL)
 }
 \arguments{
 \item{Y}{An N by N non-negative matrix of similarities}
@@ -38,6 +39,8 @@ Clarity_fixedK(Y, K = NULL, tmax = 10000, matrixdistmin = 1e-08,
 
 \item{sigmaY}{(defailt 1e-5) a parameter for \code{\link{c_initKmeans}}}
 
+\item{ensurepositive}{(default TRUE) Whether we restrict to non-negative Y. Note that the algorithm can work with some negative Y as long as it is postitive semi-definite, but this can still lead to convergence problems.}
+
 \item{fixed}{(efault NULL) which columns to keep structurally fixed. Not yet used.}
 }
 \value{
@@ -55,7 +58,8 @@ A list of class "Clarity" containing the following:
 \item calXfirst, the initial estimate of calX
 \item numiters, the number of actually used iterations
 \item matrixdist, the distance between matrices, a vector of length numiters
-\item objective, the objective function, a vector of length numiters
+\item objective, the objective function at the final (A,X;Y)
+\item objectivedist, the objective function, a vector of length numiters
 \item matrixdistmin, the matrix change threshold provided
 \item objectivedistmin, the objective change threshold provided
 }

@@ -5,9 +5,10 @@
 \title{Plot a Clarity object and another predicted from it}
 \usage{
 Clarity_ComparisonPlot(c1, c2, order = NULL, rownames = NULL,
-  zlim1 = NULL, zlim2 = NULL, zlimresidual = NULL, name1 = "Learned",
-  name2 = "Predicted", plotnames = c("Fit", "Data", "Residuals"),
-  cex.axis = 1, cex.main = 1, range.cex = 0.5, range.line = 0, ...)
+  zlim1 = NULL, zlim2 = NULL, zlimresidual = NULL,
+  name1 = "Learned", name2 = "Predicted", plotnames = c("Fit",
+  "Data", "Residuals"), cex.axis = 1, cex.main = 1, range.cex = 0.5,
+  range.line = 0, ...)
 }
 \arguments{
 \item{c1}{The first, "learned" Clarity object}
@@ -55,9 +56,11 @@ scanrepfromraw=Clarity_Predict(datarep,clist=scanraw)
 # Apply it to a new dataset with slightly different structure
 scanmixfromraw=Clarity_Predict(datamix,clist=scanraw)
 # Plot the case where the residuals shouldn't matter
-Clarity_ComparisonPlot(scanraw[[19]],scanrepfromraw[[19]],name2="Predicted (no structural change)")
+Clarity_ComparisonPlot(scanraw$scan[[19]],scanrepfromraw$scan[[19]],
+      name2="Predicted (no structural change)",zlimresidual=c(-1,1))
 # Plot the case where the residuals should matter
-Clarity_ComparisonPlot(scanraw[[19]],scanmixfromraw[[19]],name2="Predicted (one structural change)")
+Clarity_ComparisonPlot(scanraw$scan[[19]],scanmixfromraw$scan[[19]],
+      name2="Predicted (one structural change)",zlimresidual=c(-1,1))
 }
 }
 \seealso{

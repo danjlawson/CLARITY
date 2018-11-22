@@ -9,6 +9,7 @@
 #' @param K Dimension of the latent structure
 #' @param alpha (default rep(1.5,K) ) structure of calX
 #' @param sigma0 (default 0.1) Noise in the vector (Can be a vector or a scalar)
+#' @param A (defaul NULL) Provide the matrix A, instead of simulating it. If NULL, it is generated from rdirichlet(N,alpha) if alpha>0 
 #' 
 #' @keywords mixture
 #' @return A list containing:
@@ -20,7 +21,7 @@
 #' \item calX, a K by K non-negative matrix of similarities between naturally scaled latent objects
 #' \item tree, the tree that was simulated in \code{\link{rcoal}} output format
 #' \item sigma0 as input
-#' item alpha as input
+#' \item alpha as input
 #' }
 #' @seealso \code{\link{mixCoalescent}}, \code{\link{transformCoalescent}}
 #' @export
@@ -32,18 +33,26 @@
 simulateCoalescent=function(N, # Number of individuals
                             K, # Dimension of the latent structure
                       alpha=rep(0.2,K), # Dirichlet hyperparameter
-                      sigma0=0.01) # Noise in the population vector (Can be a vector or a scalar)
+                      sigma0=0.01,
+                      A=NULL) # Noise in the population vector (Can be a vector or a scalar)
 {
     tc=ape::rcoal(K)
     td=ape::cophenetic.phylo(tc)
+    if(is.null(A)){
     if(any(alpha>0)){
         A=gtools::rdirichlet(N,alpha)
+        to=order(apply(A,1,function(x)which(x==max(x))))
+        A=A[to,]
     }else{
         A=t(sapply(1:N,function(i){
             ret=rep(0,K)
             ret[sample(1:K,1)]=1
             ret
         }))
+        to=order(apply(A,1,function(x)which(x==1)))
+        A=A[to,]
+    }
+    
     }
     calX=td
     tcs=colSums(A)
@@ -53,6 +62,7 @@ simulateCoalescent=function(N, # Number of individuals
     ##    Y = Y0 * (1 + stats::rnorm(N*N,0,sigma0))
     Y = Y0  + stats::rnorm(N*N,0,sigma0)
     Y[Y<0]=0
+    colnames(Y)=rownames(Y)=rownames(A)=paste0("X",1:N)
     list(Y=Y,Y0=Y0,A=A,X=X,calX=calX,
          tree=tc,sigma0=sigma0,alpha=alpha)
 }
@@ -67,6 +77,7 @@ simulateCoalescent=function(N, # Number of individuals
 #' @param sim A simulated coalescent as returned by \code{\link{simulateCoalescent}}
 #' @param multmin (default 0.1) minimum multiplier for branch edge lengths
 #' @param multmax (default 2) maximum multiplier for branch edge lengths
+#' @param standardize (default TRUE) whether the X distances should be standardized to that of the original matrix
 #' 
 #' @keywords mixture
 #' @return A list containing the same objects as  \code{\link{simulateCoalescent}} with updated X, Y, Y0, tree elements
@@ -79,12 +90,14 @@ simulateCoalescent=function(N, # Number of individuals
 #' similarsim<-transformCoalescent(mysim)
 #' # similarsim$Y is the data datarep from package Clarity
 #' 
-transformCoalescent<-function(sim,multmin=0.1,multmax=2){
+transformCoalescent<-function(sim,multmin=0.1,multmax=2,standardize=TRUE){
     test2=sim
     test2$tree$edge.length=test2$tree$edge.length*stats::runif(length(test2$tree$edge.length),multmin,multmax) 
     td=ape::cophenetic.phylo(test2$tree)
     A=test2$A
     X=td
+    if(standardize)X=X*mean(sim$X)/mean(X)
+
     Y0=A %*% X %*% t(A)
     N=dim(A)[1]
 #    Y = Y0 * (1 + stats::rnorm(N*N,0,test2$sigma0))

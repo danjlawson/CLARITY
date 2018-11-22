@@ -4,15 +4,16 @@
 \alias{c_ForwardBackward}
 \title{Update a Clarity estimate by scanning over K}
 \usage{
-c_ForwardBackward(clist, niter = 10, thresh = 0.1, tmax = 10000,
-  verbose = TRUE, matrixdistmin = 1e-08, objectivedistmin = 0.001, ...)
+c_ForwardBackward(clist, niter = 10, thresh = -1, tmax = 10000,
+  verbose = TRUE, matrixdistmin = 1e-08, objectivedistmin = 0.001,
+  ...)
 }
 \arguments{
 \item{clist}{A list of Clarity objects as returned by \code{\link{Clarity_Scan}}}
 
 \item{niter}{(default 10) maximum number of forward-backward iterations}
 
-\item{thresh}{(default 0.1) required improvement in objective function across all K before we give up}
+\item{thresh}{(default -1) required improvement in objective function across all K before we give up. If negative, then we always try niter iterations. Setting a small, positive value can speen computation in large problems.}
 
 \item{tmax}{tmax as passed to \code{\link{Clarity_fixedK}}}
 

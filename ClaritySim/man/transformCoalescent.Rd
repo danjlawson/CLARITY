@@ -4,7 +4,8 @@
 \alias{transformCoalescent}
 \title{rescale similarities of a simulated coalescent to new branch lengths}
 \usage{
-transformCoalescent(sim, multmin = 0.1, multmax = 2)
+transformCoalescent(sim, multmin = 0.1, multmax = 2,
+  standardize = TRUE)
 }
 \arguments{
 \item{sim}{A simulated coalescent as returned by \code{\link{simulateCoalescent}}}
@@ -12,6 +13,8 @@ transformCoalescent(sim, multmin = 0.1, multmax = 2)
 \item{multmin}{(default 0.1) minimum multiplier for branch edge lengths}
 
 \item{multmax}{(default 2) maximum multiplier for branch edge lengths}
+
+\item{standardize}{(default TRUE) whether the X distances should be standardized to that of the original matrix}
 }
 \value{
 A list containing the same objects as  \code{\link{simulateCoalescent}} with updated X, Y, Y0, tree elements

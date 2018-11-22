@@ -4,8 +4,8 @@
 \alias{c_BackwardStep}
 \title{Update a Clarity estimate by scanning over decreasing K}
 \usage{
-c_BackwardStep(clist, verbose = TRUE, tmax = 10000, matrixdistmin = NULL,
-  objectivedistmin = NULL, ...)
+c_BackwardStep(clist, verbose = TRUE, tmax = 10000,
+  matrixdistmin = NULL, objectivedistmin = NULL, ...)
 }
 \arguments{
 \item{clist}{A list of Clarity objects as returned by \code{\link{Clarity_Scan}}}

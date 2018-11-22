@@ -27,7 +27,19 @@
 #' @export
 #' @examples
 
-c_initKmeans=function(Y,K,a=0.9,sigma=0.0001,sigmaY=1e-5,nstart=1000,iter.max=50){ 
+c_initKmeans=function(Y,K,a=0.9,sigma=0.0001,sigmaY=1e-5,nstart=1000,iter.max=50){
+    if(dim(Y)[1]==K){
+        A=diag(K)
+        H=Y
+        X=c_updateX(A,H,Y)
+        return(list(Y=Y,A=A,X=X))
+    }
+    if(K==1){
+        A=matrix(1,nrow=dim(Y)[1],ncol=1)
+        H=1
+        X=c_updateX(A,H,Y)
+        return(list(Y=Y,A=A,X=X))
+    }
     V=Y+stats::runif(dim(Y)[1]*dim(Y)[2],0,mean(abs(Y))*sigmaY)
     test=stats::kmeans(Y,K,nstart=nstart,iter.max=iter.max)
     H=test$centers
@@ -187,8 +199,8 @@ c_updateX<-function(A,X,Y){
 #' @examples
 c_calXfromX<-function(A,X){
     tcs=colSums(A)
-    C=diag(1/tcs)
-    tCinv=diag(tcs)
+    C=diag(1/tcs,nrow=dim(X)[1],ncol=dim(X)[2])
+    tCinv=diag(tcs,nrow=dim(X)[1],ncol=dim(X)[2])
     list(C=C,tCinv=tCinv, calX=X %*% tCinv)
 }
 
@@ -239,6 +251,7 @@ c_objectivefunction=function(A,X,Y){
 #' @param a (default 0.9) a parameter for \code{\link{c_initKmeans}}
 #' @param sigma (defailt 0.0001) a parameter for \code{\link{c_initKmeans}}
 #' @param sigmaY (defailt 1e-5) a parameter for \code{\link{c_initKmeans}}
+#' @param ensurepositive (default TRUE) Whether we restrict to non-negative Y. Note that the algorithm can work with some negative Y as long as it is postitive semi-definite, but this can still lead to convergence problems.
 #' @param fixed (efault NULL) which columns to keep structurally fixed. Not yet used.
 #' 
 #' @keywords mixture
@@ -256,7 +269,8 @@ c_objectivefunction=function(A,X,Y){
 #' \item calXfirst, the initial estimate of calX
 #' \item numiters, the number of actually used iterations
 #' \item matrixdist, the distance between matrices, a vector of length numiters
-#' \item objective, the objective function, a vector of length numiters
+#' \item objective, the objective function at the final (A,X;Y)
+#' \item objectivedist, the objective function, a vector of length numiters
 #' \item matrixdistmin, the matrix change threshold provided
 #' \item objectivedistmin, the objective change threshold provided
 #' }
@@ -278,8 +292,14 @@ Clarity_fixedK<-function(Y,
                   a=0.9, # Passed to c_initKmeans 
                   sigma=0.0001, # Passed to c_initKmeans
                   sigmaY=1e-5, # Passed to c_initKmeans
+                  ensurepositive=TRUE, # Check for whether Y is strictly non-negative
                   fixed=NULL # Do we fix any columns of A?
                   ) {
+    if(ensurepositive){
+        if(any(Y<0)) {
+            stop("ERROR: Some Y values are negative! You can either a) construct a positive Y, e.g. as.matrix(dist(Y)) or using a different construction, or b) set ensurepositive=FALSE in your call to Clarity. However, this may converge less well.")
+        }
+    }
     ## Initialisation
     if(is.null(A) || is.null(X)) {
         init=c_initKmeans(Y,K,a=a,sigma=sigma,sigmaY=sigmaY)
@@ -293,8 +313,11 @@ Clarity_fixedK<-function(Y,
     Xfirst=X
     calXlist=c_calXfromX(A,X)
     calXfirst=calXlist$calX
+    distdiff=dist
+    matrixdistlist[1]=sum(A^2) + sum(X^2)
+    objectivelist[1]=c_objectivefunction(A,X,Y)
     ## Main loop
-    for(t in 1:tmax){
+    for(t in 2:tmax){
         Alast=A
         Xlast=X
         ## Do the updates
@@ -304,7 +327,7 @@ Clarity_fixedK<-function(Y,
         ## Evaluation metrics
         diff=sum((A-Alast)^2) + sum((X-Xlast)^2) # L2 norm of the change in A and X
         dist=c_objectivefunction(A,X,Y) # Total distance from the objective
-        if(t==1) {distdiff=dist}else distdiff=objectivelist[t-1]-dist # change in the objective function
+        distdiff=objectivelist[t-1]-dist # change in the objective function
         matrixdistlist[t]=diff
         objectivelist[t]=dist
         ## Should we report?
@@ -314,7 +337,16 @@ Clarity_fixedK<-function(Y,
                        final=c_objectivefunction(A,X,Y))
             if(verbose) print(paste("Iteration",t,"Difference",format(diff,signif=2),"Objective functions",paste(format(tmpdists,signif=2),collapse=","),"Improvement",format(distdiff,signif=2)))
         }
-        ## Should we stop?
+        ## Should we return to the previous estimate and stop?
+        if(objectivelist[t]>objectivelist[t-1]) {
+            objectivelist=objectivelist[1:(t-1)]
+            matrixdistlist=matrixdistlist[1:(t-1)]
+            A=Alast
+            X=Xlast
+            if(verbose) print(paste("Stopping at iteration",t-1,"due to worsening objective function",dist,", improvement",distdiff,"difference",diff))
+            break;
+        }
+        ## Should we just stop?
         if(diff<matrixdistmin | distdiff<objectivedistmin){
             objectivelist=objectivelist[1:t]
             matrixdistlist=matrixdistlist[1:t]
@@ -333,7 +365,8 @@ Clarity_fixedK<-function(Y,
                 Xfirst=Xfirst,
                 calXfirst=calXfirst,
                 numiters=t,
-                matrixdist=matrixdistlist,
+             matrixdist=matrixdistlist,
+             objective=utils::tail(objectivelist,1),
                 objectivedist=objectivelist,
                 matrixdistmin=matrixdistmin,
              objectivedistmin=objectivedistmin)
@@ -370,8 +403,8 @@ Clarity_fixedK<-function(Y,
 #' @examples
 c_ScanOnly=function(Y,kmax=20,tmax=1e4,
                      matrixdistmin=1e-8,objectivedistmin=1e-3,
-                     printskip=1000,verbose=TRUE,...){
-    klist=2:kmax
+                    printskip=1000,verbose=TRUE,...){
+    klist=1:kmax
     clist=lapply(klist,function(k){
         print(k)
         Clarity_fixedK(Y,K=k,
@@ -380,8 +413,13 @@ c_ScanOnly=function(Y,kmax=20,tmax=1e4,
                       printskip=printskip,
                       tmax=tmax,...)
     })
-    class(clist)<-"ClarityScan"
-    return(clist)
+    ret=list(scan=clist,
+             objectives=sapply(clist,function(x)x$objective),
+             klist=klist,
+             Y=Y,
+             kmax=kmax)
+    class(ret)<-"ClarityScan"
+    return(ret)
 }
     
 ###############################
@@ -398,7 +436,8 @@ c_ScanOnly=function(Y,kmax=20,tmax=1e4,
 #' @export
 #' @examples
 c_listscore=function(clist){
-    sapply(clist,function(x)utils::tail(x$objectivedist,1))
+    if(class(clist)!="ClarityScan") stop("clist must be of class ClarityScan as returned by Clarity_Scan")
+    sapply(clist$scan,function(x)c_objectivefunction(x$A,x$X,x$Y))
 }
 
 ###############################
@@ -463,6 +502,7 @@ c_DecreaseK<-function(Y,A,X){
     tdrop=sample(1:dim(A)[2],1)
     testA=A[,-tdrop,drop=FALSE]
     testA=testA/rowSums(testA)
+    if(any(is.na(testA))) testA[is.na(testA)[,1],]=1/dim(testA)[2]
     testX=X[-tdrop,-tdrop,drop=FALSE] # In case we can't solve for X
     testX=c_updateX(testA,testX,Y) 
     list(X=testX,A=testA,dist=c_objectivefunction(testA,testX,Y))
@@ -491,39 +531,43 @@ c_DecreaseK<-function(Y,A,X){
 c_ForwardStep<-function(clist,verbose=TRUE,tmax=10000,matrixdistmin=NULL,objectivedistmin=NULL,...){
     ## Update states at K+1 using the state at K, and choose the best one to retain
     ## Report the new updated list
-    if(is.null(matrixdistmin))matrixdistmin=clist[[1]]$matrixdistmin
-    if(is.null(objectivedistmin))objectivedistmin=clist[[1]]$objectivedistmin
+    if(class(clist)!="ClarityScan") stop("clist must be of class ClarityScan as returned by Clarity_Scan")
+    scan=clist$scan
+    if(is.null(matrixdistmin))matrixdistmin=scan[[1]]$matrixdistmin
+    if(is.null(objectivedistmin))objectivedistmin=scan[[1]]$objectivedistmin
 
-    for(i in 1:(length(clist)-1)){
+    for(i in 1:(length(scan)-1)){
         ## Continue a previous run
-        ret0=Clarity_fixedK(clist[[i+1]]$Y,A=clist[[i+1]]$A,X=clist[[i+1]]$X,
+        ret0=Clarity_fixedK(scan[[i+1]]$Y,A=scan[[i+1]]$A,X=scan[[i+1]]$X,
                      tmax=tmax,
                      matrixdistmin=matrixdistmin,
                      objectivedistmin=objectivedistmin,
                      verbose=F,...)
         ## Do a new run at an increased K
-        init=c_IncreaseK(clist[[i]]$Y,clist[[i]]$A,
-                                clist[[i]]$X,alpha=0.9,dirichletbeta=1)
-        ret=Clarity_fixedK(clist[[i]]$Y,A=init$A,X=init$X,tmax=tmax,
+        init=c_IncreaseK(scan[[i]]$Y,scan[[i]]$A,
+                                scan[[i]]$X,alpha=0.9,dirichletbeta=1)
+        ret=Clarity_fixedK(scan[[i]]$Y,A=init$A,X=init$X,tmax=tmax,
                      matrixdistmin=matrixdistmin,
                      objectivedistmin=objectivedistmin,
                      verbose=F,...)
-        scores=c(orig=utils::tail(clist[[i+1]]$objectivedist,1),
-                 base=utils::tail(ret0$objectivedist,1),
-                 seq=utils::tail(ret$objectivedist,1)
+        scores=c(orig=scan[[i+1]]$objective,
+                 base=ret0$objective,
+                 seq=ret$objective
                  )
-        if(scores[3]==min(scores)){ ## New run is better
+        if(scores[1]==min(scores)){
+            if(verbose) print(paste("list entry",i+1,"rejected changes"))
+        }else if(scores[3]==min(scores)){ ## New run is better
             if(verbose) print(paste("list entry",i+1,"Using new run with score",
                                     scores[3],"over",scores[1]))
-            clist[[i+1]]=ret
+            scan[[i+1]]=ret
         }else if(scores[2]==min(scores)){
             if(verbose) print(paste("list entry",i+1,"Using extended run with score",
                                     scores[2],"over",scores[1]))
-            clist[[i+1]]=ret0
-        }else{
-            if(verbose) print(paste("list entry",i+1,"rejected changes"))
+            scan[[i+1]]=ret0
         }
     }
+    clist$scan=scan
+    clist$objectives=sapply(scan,function(x)x$objective)
     clist
 }
     
@@ -549,38 +593,42 @@ c_ForwardStep<-function(clist,verbose=TRUE,tmax=10000,matrixdistmin=NULL,objecti
 c_BackwardStep<-function(clist,verbose=TRUE,tmax=10000,matrixdistmin=NULL,objectivedistmin=NULL,...){
     ## Update states at K-1 using the state at K, and choose the best one to retain
     ## Report the new updated list
-    if(is.null(matrixdistmin))matrixdistmin=clist[[1]]$matrixdistmin
-    if(is.null(objectivedistmin))objectivedistmin=clist[[1]]$objectivedistmin
+    if(class(clist)!="ClarityScan") stop("clist must be of class ClarityScan as returned by Clarity_Scan")
+    if(is.null(matrixdistmin))matrixdistmin=clist$scan[[1]]$matrixdistmin
+    if(is.null(objectivedistmin))objectivedistmin=clist$scan[[1]]$objectivedistmin
+    scan=clist$scan
 
-    for(i in (length(clist)):2){
-        ret0=Clarity_fixedK(clist[[i-1]]$Y,A=clist[[i-1]]$A,X=clist[[i-1]]$X,
+    for(i in (length(scan)):2){
+        ret0=Clarity_fixedK(scan[[i-1]]$Y,A=scan[[i-1]]$A,X=scan[[i-1]]$X,
                      tmax=tmax,
                      matrixdistmin=matrixdistmin,
                      objectivedistmin=objectivedistmin,
                      verbose=F,...)
-        init=c_DecreaseK(clist[[i]]$Y,clist[[i]]$A,
-                                         clist[[i]]$X)
-        ret=Clarity_fixedK(clist[[i]]$Y,A=init$A,X=init$X,tmax=tmax,
+        init=c_DecreaseK(scan[[i]]$Y,scan[[i]]$A,
+                                         scan[[i]]$X)
+        ret=Clarity_fixedK(scan[[i]]$Y,A=init$A,X=init$X,tmax=tmax,
                      matrixdistmin=matrixdistmin,
                      objectivedistmin=objectivedistmin,
                      verbose=F,...)
-        scores=c(orig=utils::tail(clist[[i-1]]$objectivedist,1),
-                 base=utils::tail(ret0$objectivedist,1),
-                 seq=utils::tail(ret$objectivedist,1)
+        scores=c(orig=scan[[i-1]]$objective,
+                 base=ret0$objective,
+                 seq=ret$objective
                  )
-        if(scores[3]==min(scores)){ ## New run is better
+        if(scores[1]==min(scores)){ ## New run is better
+            if(verbose) print(paste("Backwards: list entry",i-1,"rejected changes"))
+            scan[[i-1]]=ret0
+        }else if(scores[3]==min(scores)){ ## New run is better
             if(verbose) print(paste("Backwards: list entry",i-1,"Using new run with score",
                                     scores[3],"over",scores[1]))
-            clist[[i-1]]=ret
+            scan[[i-1]]=ret
         }else if(scores[2]==min(scores)){
             if(verbose) print(paste("Backwards: list entry",i-1,"Using extended run with score",
                                     scores[2],"over",scores[1]))
-            clist[[i-1]]=ret0
-        }else{
-            if(verbose) print(paste("Backwards: list entry",i-1,"rejected changes"))
-            clist[[i-1]]=ret0
+            scan[[i-1]]=ret0
         }
     }
+    clist$scan=scan
+    clist$objectives=sapply(scan,function(x)x$objective)
     clist
 }
 
@@ -592,7 +640,7 @@ c_BackwardStep<-function(clist,verbose=TRUE,tmax=10000,matrixdistmin=NULL,object
 #' 
 #' @param clist A list of Clarity objects as returned by \code{\link{Clarity_Scan}}
 #' @param niter (default 10) maximum number of forward-backward iterations
-#' @param thresh (default 0.1) required improvement in objective function across all K before we give up
+#' @param thresh (default -1) required improvement in objective function across all K before we give up. If negative, then we always try niter iterations. Setting a small, positive value can speen computation in large problems.
 #' @param verbose Whether to output information about progress. Note that Clarity_fixedK is always run with verbose=FALSE
 #' @param tmax tmax as passed to \code{\link{Clarity_fixedK}}
 #' @param matrixdistmin (default NULL meaning derive from clist) Passed to \code{\link{Clarity_fixedK}}.
@@ -605,8 +653,9 @@ c_BackwardStep<-function(clist,verbose=TRUE,tmax=10000,matrixdistmin=NULL,object
 #' @seealso \code{\link{Clarity_Scan}} is the recommended interface for performing  inference on a representation of a single similarity matrix with Clarity.
 #' @export
 #' @examples
-c_ForwardBackward<-function(clist,niter=10,thresh=0.1,tmax=10000,verbose=TRUE,matrixdistmin=1e-8,objectivedistmin=0.001,...){
-    ## Runs backwards and forwards through the results using neighbouring runs to improve one-anaother. Does this niter times in both directions. Returns the optimised clist
+c_ForwardBackward<-function(clist,niter=10,thresh=-1,tmax=10000,verbose=TRUE,matrixdistmin=1e-8,objectivedistmin=0.001,...){
+    ## Runs backwards and forwards through the results using neighbouring runs to improve one-another. Does this niter times in both directions. Returns the optimised clist
+    if(class(clist)!="ClarityScan") stop("clist must be of class ClarityScan as returned by Clarity_Scan")
     converged=FALSE
     for(i in 1:niter){
         print(paste("Iteration",i))
@@ -624,9 +673,10 @@ c_ForwardBackward<-function(clist,niter=10,thresh=0.1,tmax=10000,verbose=TRUE,ma
                                  ...)
         score1B=c_listscore(clist1B)
         clist=clist1B
-        
+         
         scores=rbind(score0,score1A,score1B)
-        if(min(rowSums(scores))+thresh>sum(scores[1,])) {
+        if(all(diff(score1B)<=0)
+           && (min(rowSums(scores))+thresh>sum(scores[1,])) ) {
             if(verbose)print(paste("Terminating at iteration",i,"due to convergence criteria being met"))
             converged=TRUE
             break;
@@ -656,7 +706,14 @@ c_ForwardBackward<-function(clist,niter=10,thresh=0.1,tmax=10000,verbose=TRUE,ma
 #' @param ... futher parameters to be passed to \code{\link{Clarity_fixedK}}
 #' 
 #' @keywords mixture
-#' @return An object of class "ClarityScan", which is a list of length (kmax-1), each containing an object of class "Clarity" as described in \code{\link{Clarity_fixedK}} (for K=2..kmax)
+#' @return An object of class "ClarityScan", which is a list containing the following:
+#' \itemize{
+#' \item scan A list of length (kmax)-1, each containing an object of class "Clarity" as described in \code{\link{Clarity_fixedK}} (for K=2..kmax)
+#' \item objectives A vector of length (kmax)-1, the objective function at each K
+#' \item klist The list of K evaluated at, K=2..kmax
+#' \item Y The data Y provided
+#' \item kmax The maximum K requested
+#' }
 #' 
 #' @seealso \code{\link{Clarity_fixedK}} is used at each K, and documents the important parameters. \code{\link{c_ScanOnly}} is used to generate the initial ClarityScan object independently for each K.
 #' @export
@@ -683,7 +740,7 @@ Clarity_Scan<-function(Y,
                                ...)        
     }else{
         if(class(clist)!="ClarityScan") stop("clist must be of class ClarityScan as returned by Clarity_Scan")
-        kmax=clist[[length(clist)]]$K
+        kmax=clist$kmax
         if(verbose){
             print(paste0("Using provided clist which uses kmax=",kmax,". "))
         }
@@ -732,7 +789,12 @@ Clarity_Scan<-function(Y,
 #' }
 Clarity_Predict<-function(Ynew,clist) {
     if(class(clist)=="ClarityScan") {
-        ret=lapply(clist,Clarity_Predict,Ynew=Ynew)
+        ret=list()
+        ret$scan=lapply(clist$scan,Clarity_Predict,Ynew=Ynew)
+        ret$objectives=sapply(clist$scan,function(x)x$objective)
+        ret$klist=clist$klist
+        ret$Y=Ynew
+        ret$kmax=clist$kmax
         class(ret)="ClarityScan"
         return(ret)
     }else if(class(clist)=="Clarity"){
@@ -740,6 +802,7 @@ Clarity_Predict<-function(Ynew,clist) {
         X=c_updateX(A,clist$X,Ynew)
         calXlist=c_calXfromX(A,X)
         prediction=A %*% X %*% t(A)
+        objective=c_objectivefunction(A,X,Ynew)
         ret=list(Y=Ynew,A=A,X=X,
                  calX= calXlist$calX,
                  prediction = prediction, 
@@ -750,7 +813,8 @@ Clarity_Predict<-function(Ynew,clist) {
                  calXfirst=calXlist,
                  numiters=1,
                  matrixdist=0,
-                 objectivedist=c_objectivefunction(A,X,Ynew),
+                 objectivedist=objective,
+                 objective=objective,
                  matrixdistmin=clist$matrixdistmin,
                  objectivedistmin=clist$objectivedistmin
                  )
@@ -797,9 +861,11 @@ Clarity_Predict<-function(Ynew,clist) {
 #' # Apply it to a new dataset with slightly different structure
 #' scanmixfromraw=Clarity_Predict(datamix,clist=scanraw)
 #' # Plot the case where the residuals shouldn't matter
-#' Clarity_ComparisonPlot(scanraw[[19]],scanrepfromraw[[19]],name2="Predicted (no structural change)")
+#' Clarity_ComparisonPlot(scanraw$scan[[19]],scanrepfromraw$scan[[19]],
+#'       name2="Predicted (no structural change)",zlimresidual=c(-1,1))
 #' # Plot the case where the residuals should matter
-#' Clarity_ComparisonPlot(scanraw[[19]],scanmixfromraw[[19]],name2="Predicted (one structural change)")
+#' Clarity_ComparisonPlot(scanraw$scan[[19]],scanmixfromraw$scan[[19]],
+#'       name2="Predicted (one structural change)",zlimresidual=c(-1,1))
 #' }
 Clarity_ComparisonPlot=function(c1,c2,order=NULL,rownames=NULL,
                                zlim1=NULL,zlim2=NULL,
@@ -810,15 +876,15 @@ Clarity_ComparisonPlot=function(c1,c2,order=NULL,rownames=NULL,
                                range.cex=0.5,range.line=0,...){
     ## Work out what ordering to use
     n=dim(c1$prediction)[1]
-    if(is.null(order)){
+    if(any(is.null(order))){
         d1=stats::as.dendrogram(stats::hclust(stats::dist(c1$Y)))
         Rowv <- rowMeans(c1$Y)
         d1=stats::reorder(d1, Rowv)
         order=labels(d1)
-    }else if(is.na(order)){
+    }else if(any(is.na(order))){
         order=1:n
     }
-    if(is.null(rownames)) rownames=rownames(c1$Y)
+    if(any(is.null(rownames))) rownames=rownames(c1$Y)
     if(length(plotnames)<3) plotnames=rep("",3)
     
     ## Update everything with the desired order
@@ -884,7 +950,7 @@ Clarity_ComparisonPlot=function(c1,c2,order=NULL,rownames=NULL,
     if(cex.axis>0)     graphics::axis(1,at=1:n,labels=order,las=2,cex.axis=cex.axis)
     if(cex.axis>0)     graphics::axis(2,at=1:n,labels=order,las=2,cex.axis=cex.axis)
 
-    return(list(order=order,
+    invisible(list(order=order,
                 rownames=rownames,
                 c1pred=c1pred,
                 c2pred=c2pred,

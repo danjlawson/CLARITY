@@ -4,7 +4,8 @@
 \alias{simulateCoalescent}
 \title{simulate similarities under a coalescent model}
 \usage{
-simulateCoalescent(N, K, alpha = rep(0.2, K), sigma0 = 0.01)
+simulateCoalescent(N, K, alpha = rep(0.2, K), sigma0 = 0.01,
+  A = NULL)
 }
 \arguments{
 \item{N}{Number of samples}
@@ -14,6 +15,8 @@ simulateCoalescent(N, K, alpha = rep(0.2, K), sigma0 = 0.01)
 \item{alpha}{(default rep(1.5,K) ) structure of calX}
 
 \item{sigma0}{(default 0.1) Noise in the vector (Can be a vector or a scalar)}
+
+\item{A}{(defaul NULL) Provide the matrix A, instead of simulating it. If NULL, it is generated from rdirichlet(N,alpha) if alpha>0}
 }
 \value{
 A list containing:
@@ -25,7 +28,7 @@ A list containing:
 \item calX, a K by K non-negative matrix of similarities between naturally scaled latent objects
 \item tree, the tree that was simulated in \code{\link{rcoal}} output format
 \item sigma0 as input
-item alpha as input
+\item alpha as input
 }
 }
 \description{
