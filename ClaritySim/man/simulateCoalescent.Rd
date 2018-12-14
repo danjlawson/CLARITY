@@ -5,7 +5,7 @@
 \title{simulate similarities under a coalescent model}
 \usage{
 simulateCoalescent(N, K, alpha = rep(0.2, K), sigma0 = 0.01,
-  A = NULL)
+  tree = NULL, A = NULL, minedge = 0)
 }
 \arguments{
 \item{N}{Number of samples}
@@ -16,7 +16,9 @@ simulateCoalescent(N, K, alpha = rep(0.2, K), sigma0 = 0.01,
 
 \item{sigma0}{(default 0.1) Noise in the vector (Can be a vector or a scalar)}
 
-\item{A}{(defaul NULL) Provide the matrix A, instead of simulating it. If NULL, it is generated from rdirichlet(N,alpha) if alpha>0}
+\item{tree}{(default NULL) Provide the tree describing the relationship between the K latent classes}
+
+\item{A}{(default NULL) Provide the matrix A, instead of simulating it. If NULL, it is generated from rdirichlet(N,alpha) if alpha>0}
 }
 \value{
 A list containing:

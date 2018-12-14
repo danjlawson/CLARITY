@@ -9,7 +9,8 @@
 #' @param K Dimension of the latent structure
 #' @param alpha (default rep(1.5,K) ) structure of calX
 #' @param sigma0 (default 0.1) Noise in the vector (Can be a vector or a scalar)
-#' @param A (defaul NULL) Provide the matrix A, instead of simulating it. If NULL, it is generated from rdirichlet(N,alpha) if alpha>0 
+#' @param A (default NULL) Provide the matrix A, instead of simulating it. If NULL, it is generated from rdirichlet(N,alpha) if alpha>0 
+#' @param tree (default NULL) Provide the tree describing the relationship between the K latent classes
 #' 
 #' @keywords mixture
 #' @return A list containing:
@@ -33,35 +34,39 @@
 simulateCoalescent=function(N, # Number of individuals
                             K, # Dimension of the latent structure
                       alpha=rep(0.2,K), # Dirichlet hyperparameter
-                      sigma0=0.01,
-                      A=NULL) # Noise in the population vector (Can be a vector or a scalar)
+                      sigma0=0.01,# Noise in the population vector (Can be a vector or a scalar)
+                      tree=NULL, # optional: specify a tree
+                      A=NULL,
+                      minedge=0) # optional: specify A. must have K columns 
 {
-    tc=ape::rcoal(K)
+    if(is.null(tree)){
+        tc=ape::rcoal(K)
+        if(minedge>0)tc$edge.length=sapply(tc$edge.length,function(x)max(minedge,x))
+
+    }else tc=tree
+
     td=ape::cophenetic.phylo(tc)
-    if(is.null(A)){
-    if(any(alpha>0)){
-        A=gtools::rdirichlet(N,alpha)
-        to=order(apply(A,1,function(x)which(x==max(x))))
-        A=A[to,]
-    }else{
-        A=t(sapply(1:N,function(i){
-            ret=rep(0,K)
-            ret[sample(1:K,1)]=1
-            ret
-        }))
-        to=order(apply(A,1,function(x)which(x==1)))
-        A=A[to,]
-    }
-    
+    if(is.null(A)) {
+        if(any(alpha>0)){
+            A=gtools::rdirichlet(N,alpha)
+            to=order(apply(A,1,function(x)which(x==max(x))))
+            A=A[to,]
+        }else{
+            A=t(sapply(1:N,function(i){
+                ret=rep(0,K)
+                ret[sample(1:K,1)]=1
+                ret
+            }))
+            to=order(apply(A,1,function(x)which(x==1)))
+            A=A[to,]
+        }
     }
     calX=td
     tcs=colSums(A)
     C=diag(1/tcs)
-    X=calX %*% t(C)
+    X=calX #%*% t(C)
     Y0=A %*% X %*% t(A)
-    ##    Y = Y0 * (1 + stats::rnorm(N*N,0,sigma0))
-    Y = Y0  + stats::rnorm(N*N,0,sigma0)
-    Y[Y<0]=0
+    Y = Y0 * stats::rgamma(N*N,shape=1/(sigma0)^2,rate=1/(sigma0)^2)
     colnames(Y)=rownames(Y)=rownames(A)=paste0("X",1:N)
     list(Y=Y,Y0=Y0,A=A,X=X,calX=calX,
          tree=tc,sigma0=sigma0,alpha=alpha)
@@ -100,9 +105,7 @@ transformCoalescent<-function(sim,multmin=0.1,multmax=2,standardize=TRUE){
 
     Y0=A %*% X %*% t(A)
     N=dim(A)[1]
-#    Y = Y0 * (1 + stats::rnorm(N*N,0,test2$sigma0))
-    Y = Y0  + stats::rnorm(N*N,0,test2$sigma0)
-    Y[Y<0]=0
+    Y = Y0 * stats::rgamma(N*N,shape=1/(sim$sigma0)^2,rate=1/(sim$sigma0)^2)
     test2$X=X
     test2$Y=Y
     test2$Y0=Y0
@@ -150,17 +153,13 @@ mixCoalescent<-function(sim, beta=0.5,qmin=0.5,transform=TRUE,...){
     testix=which(A[,testi[1]]>0)
     A[testix,testi[2]]=(beta) * A[testix,testi[1]]
     A[testix,testi[1]]=A[testix,testi[1]] * (1-beta)
-##    X=beta * tmix$X + (1-beta)*sim$X
     Y0=A %*% X %*% t(A)
     N=dim(A)[1]
-#    Y = Y0 * (1 + stats::rnorm(N*N,0,test2$sigma0))
-    Y = Y0  + stats::rnorm(N*N,0,test2$sigma0)
-    Y[Y<0]=0
+    Y = Y0 * stats::rgamma(N*N,shape=1/(sim$sigma0)^2,rate=1/(sim$sigma0)^2)
     test2$A=A
     test2$X=X
     test2$Y=Y
     test2$Y0=Y0
-#    test2$tree2=tmix$tree
     test2$beta=beta
     test2
 }

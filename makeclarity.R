@@ -36,8 +36,18 @@ library("ClaritySim")
 ## How the Clarity data are made
 
 library("ClaritySim")
+
 set.seed(1)
-mysim<-simulateCoalescent(100,10) # Simlulate 100 objects in a 10 dimensional latent space
+n=100 ; k=10
+nperpop=n/k
+simA=sapply(1:k,function(i){
+    t(sapply(1:nperpop,function(rep){
+        x=rep(0,k); x[i]=1;x
+    }))
+})
+mysim=simulateCoalescent(n,k,sigma0=0.0001,
+                         A=simA,minedge=0.1) # Simlulate 100 objects in a 10 dimensional latent space
+
 myroworder=order(apply(mysim$A,1,which.max))
 mysim$A=mysim$A[myroworder,]
 mysim$Y=mysim$Y[myroworder,myroworder]
@@ -53,7 +63,7 @@ system("mkdir -p Clarity/data")
 save(dataraw,file="Clarity/data/dataraw.RData")
 save(datarep,file="Clarity/data/datarep.RData")
 save(datamix,file="Clarity/data/datamix.RData")
-
+save(mysim,similarsim,alternatesim,file="Clarity_AdditionalData.RData")
 ##############################
 ## Basic Clarity usage
 

@@ -2,53 +2,50 @@
 % Please edit documentation in R/Clarity.R
 \name{Clarity_Scan}
 \alias{Clarity_Scan}
-\title{Run The full Clarity algorithm}
+\title{Run the full Clarity algorithm to fit a range of mixture models to data.}
 \usage{
-Clarity_Scan(Y, kmax = 20, clist = NULL, niter = 10, thresh = 0.1,
-  tmax = 10000, verbose = TRUE, matrixdistmin = 1e-08,
-  objectivedistmin = 0.001, ...)
+Clarity_Scan(Y, kmax = 20, method = "SVD", clist = NULL,
+  verbose = TRUE, ...)
 }
 \arguments{
-\item{Y}{An N by N non-negative matrix of similarities}
+\item{Y}{The similarity or distance matrix to be fitted. In principle any square matrix is allowed but algorithmically you may have problems if it is non-negative or rank-deficient.}
 
-\item{kmax}{(default 20) an integer giving the maximum dimension of the fit to be used (2..kmax are used). Ignored if clist is provided.}
+\item{kmax}{(default: 20): The maximum number of mixture components to be considered. All values less than this are explored}
 
-\item{clist}{(default NULL) A list of Clarity objects as returned by \code{\link{Clarity_Scan}}. If not provided, \code{\link{c_ScanOnly}} is used to generate an initial run with the specified kmax.}
+\item{method}{(Default: "SVD") Fuzzy matched to either "SVD" or "Multiplicative"}
 
-\item{niter}{(default 10) maximum number of forward-backward iterations}
+\item{clist}{(Default: NULL, meaning start from scratch) A previously learned  "ClarityScan" object. Useful for adding additional iterations to \code{\link{Clarity_Multiplicative_Scan}}.}
 
-\item{thresh}{(default 0.1) required improvement in objective function across all K before we give up}
+\item{verbose}{(default: TRUE) verbose output?}
 
-\item{tmax}{tmax as passed to \code{\link{Clarity_fixedK}}}
-
-\item{verbose}{Whether to output information about progress. Note that Clarity_fixedK is always run with verbose=FALSE}
-
-\item{matrixdistmin}{(default NULL meaning derive from clist) Passed to \code{\link{Clarity_fixedK}}.}
-
-\item{objectivedistmin}{(default NULL meaning derive from clist) Passed to \code{\link{Clarity_fixedK}}.}
-
-\item{...}{futher parameters to be passed to \code{\link{Clarity_fixedK}}}
+\item{...}{additional parameters to the methods; principally tuning parameters for  \code{\link{Clarity_Multiplicative_Scan}}.}
 }
 \value{
-An object of class "ClarityScan", which is a list containing the following:
+An object of class "ClarityScan", which is a list containing:
 \itemize{
-\item scan A list of length (kmax)-1, each containing an object of class "Clarity" as described in \code{\link{Clarity_fixedK}} (for K=2..kmax)
-\item objectives A vector of length (kmax)-1, the objective function at each K
-\item klist The list of K evaluated at, K=2..kmax
+\item scan A list of length (kmax)-1, each containing an object of class "Clarity" as described in \code{\link{Clarity_fixedK}} (for K=1..kmax)
+\item objectives A vector of length (kmax), the objective function at each K
+\item klist The list of K evaluated at, K=1..kmax
 \item Y The data Y provided
 \item kmax The maximum K requested
+\item ... Additional method-specific details (e.g. Ysvd for method="SVD")
 }
 }
 \description{
-Learn a mixture model representation of a provided similarity matrix Y using Clarity. You may either choose the maximum number of components to use, kmax, or provide a pre-existing list of
+Learn a mixture model representation of a provided similarity or distance matrix Y using Clarity.
+
+Two methods are available:
+"SVD": A fast method that provides high quality predictions and zero fuss. Uses \code{\link{c_SVD_Scan}}.
+"Multiplicative": A slower method that tries to find a minimum volume encolosing simplex for the data, making the output into a legititate mixture solution with additional assumptions. Uses \code{\link{Clarity_Multiplicative_Scan}}.
 }
 \examples{
 \donttest{
-scanraw=Clarity_Scan(dataraw) # Generate an initial run
-scanraw=Clarity_Scan(dataraw,clist=scanraw) # Run it for longer
+scansvd=Clarity_Scan(dataraw) # SVD method model fit
+scanmult=Clarity_Scan(dataraw,method="M") # Multiplicative method model fit
+scanmult=Clarity_Scan(dataraw,method="M",clist=scanmult) # Iterate the Multiplicative method longer
 }
 }
 \seealso{
-\code{\link{Clarity_fixedK}} is used at each K, and documents the important parameters. \code{\link{c_ScanOnly}} is used to generate the initial ClarityScan object independently for each K.
+\code{\link{Clarity_fixedK}} for the details of what a "Clarity" object is. \code{\link{Clarity_Predict}} to make an initial prediction of the new data.
 }
 \keyword{mixture}

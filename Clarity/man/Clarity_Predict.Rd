@@ -4,12 +4,14 @@
 \alias{Clarity_Predict}
 \title{Predict one Similarity from a Clarity or ClarityScan object}
 \usage{
-Clarity_Predict(Ynew, clist)
+Clarity_Predict(Ynew, clist, Ysvd = NULL)
 }
 \arguments{
 \item{Ynew}{The data to be predicted}
 
 \item{clist}{The learned Clarity object, either of class "Clarity" or of class "ClarityScan"}
+
+\item{Ysvd}{Default NULL. SVD of Y, which is needed for the method="SVD". You can provide it or it will be computed for you when using this method. NB: It should be the SVD of Y-rowMeans(Y) to remove the mean effect!}
 }
 \value{
 An object of the same class as clist provided, with updated Y, X and derived features.
@@ -20,7 +22,6 @@ Takes each Clarity object and learns a new X for the new data Ynew provided.
 \examples{
 \donttest{
 scanraw=Clarity_Scan(dataraw) # Generate an initial run
-scanraw=Clarity_Scan(dataraw,clist=scanraw) # Run it for longer
 # Apply it to a new dataset with the same structure
 scanrepfromraw=Clarity_Predict(datarep,clist=scanraw) 
 # Apply it to a new dataset with slightly different structure
