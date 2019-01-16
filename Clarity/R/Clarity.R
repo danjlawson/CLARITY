@@ -307,7 +307,9 @@ Clarity_Extend <- function(clist,kmax=10,
 #' Learn a mixture model representation of a provided similarity or distance matrix Y using Clarity.
 #'
 #' Two methods are available:
-#' "SVD": A fast method that provides high quality predictions and zero fuss. Uses \code{\link{c_SVD_Scan}}.
+#' "SVDX": A fast method that provides high quality predictions and zero fuss. Uses \code{\link{c_simpleSVD_Scan}} and can tolerate asymmetric Y.
+#' "SVD": A fast method that provides high quality predictions and zero fuss. Uses \code{\link{c_simpleSVD_Scan}} using the SVD singluar value matrix for X, assuming symmetry.
+#' "SVDmix": A relatively fast method that provides high quality predictions based on forming a mixture around an SVD. Uses \code{\link{c_SVD_Scan}}.
 #' "Multiplicative": A slower method that tries to find a minimum volume encolosing simplex for the data, making the output into a legititate mixture solution with additional assumptions. Uses \code{\link{Clarity_Multiplicative_Scan}}.
 #'
 #' 
@@ -338,15 +340,20 @@ Clarity_Extend <- function(clist,kmax=10,
 #' scanmult=Clarity_Scan(dataraw,method="M",clist=scanmult) # Iterate the Multiplicative method longer
 #' }
 Clarity_Scan <- function(Y, kmax =20,
-                         method="SVD",
+                         method="SVDX",
                          clist=NULL, verbose=TRUE,
                          ...){
-    method=c_argmatch(method,c("SVD","Multiplicative"))
-    if(method=="SVD"){
+    method=c_argmatch(method,c("SVD","SVDX","SVDmix","Multiplicative"))
+    if(method=="SVDmix"){
         clist=c_SVD_Scan(Y,kmax,clist,verbose=verbose,...)
+    }else if(method=="SVD"){
+        clist=c_simpleSVD_Scan(Y,kmax,clist,verbose=verbose,X="Sigma",...)
+    }else if(method=="SVDX"){
+        clist=c_simpleSVD_Scan(Y,kmax,clist,verbose=verbose,X="X",...)
     }else if(method=="Multiplicative"){
         clist=Clarity_Multiplicative_Scan(Y,kmax,clist,verbose=verbose,...)
     }else{
         stop("Invalid method")
     }
 }
+

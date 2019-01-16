@@ -84,7 +84,7 @@ c_GetAFromSimplex <- function(Z,ZS){
     Aret
 }
 ###############################
-#' @title Compute the Clarity model by SVD embedding data for a fixed size of model k
+#' @title Compute the Clarity model using a mixture model surrounding an SVD embedding data for a fixed size of model k
 #'
 #' @description
 #' Given data Y, and its mean centred svd Ysvd, and a choice of the number of mixture components k to use,.
@@ -127,7 +127,7 @@ c_SVD_fixedK <- function(Ysvd,Y,k,verbose=TRUE){
 }
 
 ###############################
-#' @title Compute the Clarity model by SVD embedding data for a range of model sizes
+#' @title Compute the Clarity model using a mixture model surrounding an SVD embedding data for a range of model sizes
 #'
 #' @description
 #' Given data Y, embed it into a space of dimension 1..kmax and fit it as a mixture
