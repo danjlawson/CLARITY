@@ -1,9 +1,8 @@
 COPYRIGHT (C) University of Bristol 2018-2019
 
-CLARITY, an R package for Comparing DissimiLARITY matrices
+ClaritySim, an R package for simulating data for use with CLARITY 
 
 Author: Daniel Lawson (dan.lawson@bristol.ac.uk)
-
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
