@@ -2,7 +2,7 @@
 % Please edit documentation in R/ClaritySVD.R
 \name{c_SVD_fixedK}
 \alias{c_SVD_fixedK}
-\title{Compute the Clarity model by SVD embedding data for a fixed size of model k}
+\title{Compute the Clarity model using a mixture model surrounding an SVD embedding data for a fixed size of model k}
 \usage{
 c_SVD_fixedK(Ysvd, Y, k, verbose = TRUE)
 }

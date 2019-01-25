@@ -4,7 +4,7 @@
 \alias{Clarity_Scan}
 \title{Run the full Clarity algorithm to fit a range of mixture models to data.}
 \usage{
-Clarity_Scan(Y, kmax = 20, method = "SVD", clist = NULL,
+Clarity_Scan(Y, kmax = 20, method = "SVDX", clist = NULL,
   verbose = TRUE, ...)
 }
 \arguments{
@@ -35,7 +35,9 @@ An object of class "ClarityScan", which is a list containing:
 Learn a mixture model representation of a provided similarity or distance matrix Y using Clarity.
 
 Two methods are available:
-"SVD": A fast method that provides high quality predictions and zero fuss. Uses \code{\link{c_SVD_Scan}}.
+"SVDX": A fast method that provides high quality predictions and zero fuss. Uses \code{\link{c_simpleSVD_Scan}} and can tolerate asymmetric Y.
+"SVD": A fast method that provides high quality predictions and zero fuss. Uses \code{\link{c_simpleSVD_Scan}} using the SVD singluar value matrix for X, assuming symmetry.
+"SVDmix": A relatively fast method that provides high quality predictions based on forming a mixture around an SVD. Uses \code{\link{c_SVD_Scan}}.
 "Multiplicative": A slower method that tries to find a minimum volume encolosing simplex for the data, making the output into a legititate mixture solution with additional assumptions. Uses \code{\link{Clarity_Multiplicative_Scan}}.
 }
 \examples{

@@ -2,7 +2,7 @@
 % Please edit documentation in R/ClaritySVD.R
 \name{c_SVD_Scan}
 \alias{c_SVD_Scan}
-\title{Compute the Clarity model by SVD embedding data for a range of model sizes}
+\title{Compute the Clarity model using a mixture model surrounding an SVD embedding data for a range of model sizes}
 \usage{
 c_SVD_Scan(Y, kmax = NULL, Ysvd = NULL, verbose = TRUE)
 }
