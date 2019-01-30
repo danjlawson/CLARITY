@@ -31,7 +31,7 @@ c_simpleSVD_fixedK <- function(Ysvd,Y,k,verbose=TRUE,Xtype="X"){
     }
     rownames(A)=rownames(Y)
     Yhat=A %*% X %*% t(A)
-    Yresid=Yhat-Y
+    Yresid=Y-Yhat
     objective=sum((Y - Yhat)^2)
     ret=list(A=A,X=X,prediction=Yhat,
              Y=Y,k=k,Yresid=Yresid,objective=objective)

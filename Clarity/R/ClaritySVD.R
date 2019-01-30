@@ -118,7 +118,7 @@ c_SVD_fixedK <- function(Ysvd,Y,k,verbose=TRUE){
     rownames(A)=rownames(Y)
     X=c_Robust_updateX_solve(A,Y)
     Yhat=A %*% X %*% t(A)
-    Yresid=Yhat-Y
+    Yresid=Y-Yhat
     objective=sum((Y - Yhat)^2)
     ret=list(A=A,Z=Z,ZS=ZS,X=X,prediction=Yhat,
              Y=Y,k=k,Yresid=Yresid,objective=objective)
