@@ -5,7 +5,7 @@
 \title{simulate similarities under a coalescent model}
 \usage{
 simulateCoalescent(N, K, alpha = rep(0.2, K), sigma0 = 0.01,
-  tree = NULL, A = NULL, minedge = 0)
+  tree = NULL, A = NULL, Amodel = "sample", minedge = 0)
 }
 \arguments{
 \item{N}{Number of samples}
@@ -19,6 +19,10 @@ simulateCoalescent(N, K, alpha = rep(0.2, K), sigma0 = 0.01,
 \item{tree}{(default NULL) Provide the tree describing the relationship between the K latent classes}
 
 \item{A}{(default NULL) Provide the matrix A, instead of simulating it. If NULL, it is generated from rdirichlet(N,alpha) if alpha>0}
+
+\item{Amodel}{(default: "sample") either "sample" or "uniform" to determine membership of clusters when alpha=0}
+
+\item{minedge}{(default: 0) Minimum branch length. Any edges shorter than minedge are set to minedge, resulting in a non-ultrametric tree.}
 }
 \value{
 A list containing:

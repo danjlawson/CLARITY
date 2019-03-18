@@ -8,7 +8,7 @@ Clarity_ObjectivePlot(clist, add = FALSE, legendloc = "bottomleft",
   legendbty = "n", name = NULL, lty = NULL, col = NULL,
   pch = NULL, lwd = NULL, lines = TRUE, points = TRUE,
   xlim = NULL, ylim = NULL, xlab = "K",
-  ylab = "Objective Function", main = "", ...)
+  ylab = "Objective Function", main = "", extern = TRUE, ...)
 }
 \arguments{
 \item{clist}{the list of P clarityscan objects}
@@ -42,6 +42,8 @@ Clarity_ObjectivePlot(clist, add = FALSE, legendloc = "bottomleft",
 \item{ylab}{Label for y axis}
 
 \item{main}{Label for main}
+
+\item{extern}{(Default: TRUE) whether being called externally or not.}
 
 \item{...}{Additional parameters to plot}
 }

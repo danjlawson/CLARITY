@@ -2,7 +2,7 @@ Package: ClaritySim
 Title: Simulate Similarity Matrices for comparison with Clarity
 Version: 0.0.0.9000
 Authors@R: person("Daniel", "Lawson", email = "dan.lawson@bristol.ac.uk", role = c("aut", "cre"))
-Description: Simulates Comparable Similarity Matrices for use with Clarity using trees.
+Description: Simulates Comparable Similarity Matrices for use with Clarity using tree mixtures.
 Depends: R (>= 3.3)
 License: GPL-3
 Imports: gtools, ape, stats

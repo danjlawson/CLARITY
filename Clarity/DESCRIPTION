@@ -1,10 +1,10 @@
 Package: Clarity
 Title: Compare simiLARITY matrices using non-parametric mixtures
-Version: 0.0.0.9001
+Version: 0.0.0.9002
 Authors@R: person("Daniel", "Lawson", email = "dan.lawson@bristol.ac.uk", role = c("aut", "cre"))
-Description: CLARITY is a package for "Modelling Similarity Matrices as Mixtures for structural comparison.
+Description: CLARITY is a package for Modelling Similarity Matrices for structural comparison.
 Depends: R (>= 3.3)
-License: LicenseRef-LICENCE
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Imports: stats, utils

@@ -29,8 +29,8 @@ c_listDivergence=function(y2pred,y1scan){
 #' 
 #' @param y1scan A ClarityScan object produced by Clarity_Scan
 #' @param y2scan A ClarityScan object produced by Clarity_Scan
-#' @param y1pred A ClarityScan object produced by Clarity_Predict, predicted from y2scan
-#' @param y2pred A ClarityScan object produced by Clarity_Predict, predicted from y1scan
+#' @param y12pred A ClarityScan object produced by Clarity_Predict, predicted from y2scan
+#' @param y21pred A ClarityScan object produced by Clarity_Predict, predicted from y1scan
 #' 
 #' @return A list of matrices, each containing the Standardized Divergence Matrix
 #' @seealso \code{\link{c_listDivergence}} which is used to compute the divergences.
@@ -235,7 +235,8 @@ Clarity_ComparisonPlot=function(c1,c2,order=NULL,rownames=NULL,
 #' @title Get a plot value in a sensible way
 #'
 #' @description
-#'
+#' Generate a default colour/line type/pch etc for a ClarityScan object. Users are suggested to supply their own choices rather than call c_getplotval directly.
+#' 
 #' @param x the provided value
 #' @param i the index
 #' @param clist the list of clarityscan objects
@@ -271,6 +272,7 @@ c_getplotval <- function (x,i,clist,default){
 #' @param xlab Label for x axis
 #' @param ylab Label for y axis
 #' @param main Label for main
+#' @param extern (Default: TRUE) whether being called externally or not.
 #' @param ... Additional parameters to plot
 #' @return the desired plot symbol
 #' @export
@@ -285,31 +287,37 @@ Clarity_ObjectivePlot <-function(clist,add=FALSE,
                                  xlab="K",
                                  ylab="Objective Function",
                                  main="",
-                                 
+                                 extern=TRUE,
                                  ...){
     if(class(clist)%in%c("ClarityScan","ClarityScanExtend")) {
-        if(!add){
-            if(is.null(xlim)) xlim=range(clist$klist)
-            if(is.null(ylim)) xlim=range(clist$objectives)
-            if(is.null(lty)) lty=1
-            if(is.null(col)) col=1
-            if(is.null(pch)) pch=1
-            if(is.null(lwd)) lwd=1
-            plot(clist$klist,clist$objectives,xlim=xlim,ylim=ylim,
-                 type="n",xlab=xlab,ylab=ylab,main=main,...)
+        if(extern){
+            print("Warning: called Clarity_ObjectivePlot on a ClarityScan object. Expected a list of ClarityScan objects with names. Will proceed with the name 'scan'.");
+            clist=list("scan"=clist)
+        }else{
+            if(!add){
+                if(is.null(xlim)) xlim=range(clist$klist)
+                if(is.null(ylim)) xlim=range(clist$objectives)
+                if(is.null(lty)) lty=1
+                if(is.null(col)) col=1
+                if(is.null(pch)) pch=1
+                if(is.null(lwd)) lwd=1
+                graphics::plot(clist$klist,clist$objectives,xlim=xlim,ylim=ylim,
+                               type="n",xlab=xlab,ylab=ylab,main=main,...)
+            }
+            if(lines)graphics::lines(clist$klist,clist$objectives,lty=lty,lwd=lwd,col=col)
+            if(points)graphics::points(clist$klist,clist$objectives,pch=pch,col=col)
+            ret=list(name=name,lty=lty,lwd=lwd,col=col,pch=pch)
+            return(ret)
         }
-        if(lines)lines(clist$klist,clist$objectives,lty=lty,lwd=lwd,col=col)
-        if(points)points(clist$klist,clist$objectives,pch=pch,col=col)
-        ret=list(name=name,lty=lty,lwd=lwd,col=col,pch=pch)
-        return(ret)
-    }else if(class(clist)=="list"){
+    }
+    if(class(clist)=="list"){
         if(class(clist[[1]])%in%c("ClarityScan","ClarityScanExtend")){
             if(is.null(xlim)) xlim=range(sapply(clist,function(x)x$klist))
             if(is.null(ylim)) ylim=range(sapply(clist,function(x)x$objectives))
             if(is.null(name) && !is.null(names(clist))) name=names(clist)
             Clarity_ObjectivePlot(clist[[1]],add=add,lines=FALSE,points=FALSE,
-                                           xlim=xlim,ylim=ylim,...)
-            if(length(clist)>1) {
+                                           xlim=xlim,ylim=ylim,extern=FALSE,...)
+            if(length(clist)>=1) {
                 for(i in 1:length(clist)){
                     tcol=c_getplotval(col,i,clist,i)
                     tlwd=c_getplotval(lwd,i,clist,1)
@@ -320,11 +328,12 @@ Clarity_ObjectivePlot <-function(clist,add=FALSE,
                     ret[[i]]=Clarity_ObjectivePlot(clist[[i]],add=TRUE,
                                                     name=tname,
                                                     lines=lines,points=points,
-                                                    col=tcol,lwd=tlwd,lty=tlty,pch=tpch)
+                                                    col=tcol,lwd=tlwd,lty=tlty,pch=tpch,extern=FALSE)
                 }
             }
         }else stop("Unrecognised structure for clist")
-        if(class(legendloc)=="character")legend(legendloc,legend=sapply(ret,function(x)x$name),
+        if(class(legendloc)=="character")
+            graphics::legend(legendloc,legend=sapply(ret,function(x)x$name),
                lty=sapply(ret,function(x)x$lty),
                col=sapply(ret,function(x)x$col),
                text.col=sapply(ret,function(x)x$col),
@@ -332,7 +341,7 @@ Clarity_ObjectivePlot <-function(clist,add=FALSE,
                pch=sapply(ret,function(x)x$pch),
                bty=legendbty)
 
-        return(ret)
+        return(invisible(ret))
     }else{
         stop("Unrecognised structure for clist")
     }

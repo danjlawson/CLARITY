@@ -19,5 +19,5 @@ c_getplotval(x, i, clist, default)
 the desired plot symbol
 }
 \description{
-
+Generate a default colour/line type/pch etc for a ClarityScan object. Users are suggested to supply their own choices rather than call c_getplotval directly.
 }

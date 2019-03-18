@@ -11,6 +11,8 @@
 #' @param sigma0 (default 0.1) Noise in the vector (Can be a vector or a scalar)
 #' @param A (default NULL) Provide the matrix A, instead of simulating it. If NULL, it is generated from rdirichlet(N,alpha) if alpha>0 
 #' @param tree (default NULL) Provide the tree describing the relationship between the K latent classes
+#' @param Amodel (default: "sample") either "sample" or "uniform" to determine membership of clusters when alpha=0
+#' @param minedge (default: 0) Minimum branch length. Any edges shorter than minedge are set to minedge, resulting in a non-ultrametric tree.
 #' 
 #' @keywords mixture
 #' @return A list containing:
@@ -36,8 +38,9 @@ simulateCoalescent=function(N, # Number of individuals
                       alpha=rep(0.2,K), # Dirichlet hyperparameter
                       sigma0=0.01,# Noise in the population vector (Can be a vector or a scalar)
                       tree=NULL, # optional: specify a tree
-                      A=NULL,
-                      minedge=0) # optional: specify A. must have K columns 
+                      A=NULL,# optional: specify A. must have K columns
+                      Amodel="sample", 
+                      minedge=0)  
 {
     if(is.null(tree)){
         tc=ape::rcoal(K)
@@ -54,7 +57,8 @@ simulateCoalescent=function(N, # Number of individuals
         }else{
             A=t(sapply(1:N,function(i){
                 ret=rep(0,K)
-                ret[sample(1:K,1)]=1
+                if(Amodel=="sample") ret[sample(1:K,1)]=1
+                else ret[1+((i-1)%%K)]=1
                 ret
             }))
             to=order(apply(A,1,function(x)which(x==1)))

@@ -306,11 +306,11 @@ Clarity_Extend <- function(clist,kmax=10,
 #' @description
 #' Learn a mixture model representation of a provided similarity or distance matrix Y using Clarity.
 #'
-#' Two methods are available:
-#' "SVDX": A fast method that provides high quality predictions and zero fuss. Uses \code{\link{c_simpleSVD_Scan}} and can tolerate asymmetric Y.
-#' "SVD": A fast method that provides high quality predictions and zero fuss. Uses \code{\link{c_simpleSVD_Scan}} using the SVD singluar value matrix for X, assuming symmetry.
-#' "SVDmix": A relatively fast method that provides high quality predictions based on forming a mixture around an SVD. Uses \code{\link{c_SVD_Scan}}.
-#' "Multiplicative": A slower method that tries to find a minimum volume encolosing simplex for the data, making the output into a legititate mixture solution with additional assumptions. Uses \code{\link{Clarity_Multiplicative_Scan}}.
+#' Several methods are available:
+#' * "SVDX": A fast method that provides high quality predictions and zero fuss. Uses \code{\link{c_simpleSVD_Scan}} and can tolerate asymmetric Y.
+#' * "SVD": A fast method that provides high quality predictions and zero fuss. Uses \code{\link{c_simpleSVD_Scan}} using the SVD singluar value matrix for X, assuming symmetry.
+#' * "SVDmix": A relatively fast method that provides high quality predictions based on forming a mixture around an SVD. Uses \code{\link{c_SVD_Scan}}.
+#' * "Multiplicative": A slower method that tries to find a minimum volume encolosing simplex for the data, making the output into a legititate mixture solution with additional assumptions. Uses \code{\link{Clarity_Multiplicative_Scan}}.
 #'
 #' 
 #' @param Y The similarity or distance matrix to be fitted. In principle any square matrix is allowed but algorithmically you may have problems if it is non-negative or rank-deficient.
@@ -347,9 +347,9 @@ Clarity_Scan <- function(Y, kmax =20,
     if(method=="SVDmix"){
         clist=c_SVD_Scan(Y,kmax,clist,verbose=verbose,...)
     }else if(method=="SVD"){
-        clist=c_simpleSVD_Scan(Y,kmax,clist,verbose=verbose,X="Sigma",...)
+        clist=c_simpleSVD_Scan(Y,kmax,clist,verbose=verbose,Xtype="Sigma",...)
     }else if(method=="SVDX"){
-        clist=c_simpleSVD_Scan(Y,kmax,clist,verbose=verbose,X="X",...)
+        clist=c_simpleSVD_Scan(Y,kmax,clist,verbose=verbose,Xtype="X",...)
     }else if(method=="Multiplicative"){
         clist=Clarity_Multiplicative_Scan(Y,kmax,clist,verbose=verbose,...)
     }else{

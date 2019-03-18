@@ -18,7 +18,7 @@ check()
 
 
 setwd("/Users/madjl/code/Clarity")
-install("ClaritySim")
+1install("ClaritySim")
 install("Clarity")
 
 ## Make distributable packages

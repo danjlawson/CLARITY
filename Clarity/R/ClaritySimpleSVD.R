@@ -65,7 +65,7 @@ c_simpleSVD_Scan <- function(Y,kmax=NULL,Ysvd=NULL,verbose=TRUE,Xtype="X"){
         Ysvd=svd(Y)
         Ys=sapply(1:dim(Ysvd$u)[1],
                   function(i){
-                      cor(Ysvd$u[,i],Ysvd$v[,i]) >0
+                      stats::cor(Ysvd$u[,i],Ysvd$v[,i]) >0
                   })
         for(i in 1:length(Ys)){
             if(!Ys[i]) {
