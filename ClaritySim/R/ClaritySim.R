@@ -12,6 +12,7 @@
 #' @param A (default NULL) Provide the matrix A, instead of simulating it. If NULL, it is generated from rdirichlet(N,alpha) if alpha>0 
 #' @param tree (default NULL) Provide the tree describing the relationship between the K latent classes
 #' @param Amodel (default: "sample") either "sample" or "uniform" to determine membership of clusters when alpha=0
+#' @param tipdist (default: 0) Distance within tips. Tree distances, including the diagonal, are incremented by this.
 #' @param minedge (default: 0) Minimum branch length. Any edges shorter than minedge are set to minedge, resulting in a non-ultrametric tree.
 #' 
 #' @keywords mixture
@@ -39,7 +40,8 @@ simulateCoalescent=function(N, # Number of individuals
                       sigma0=0.01,# Noise in the population vector (Can be a vector or a scalar)
                       tree=NULL, # optional: specify a tree
                       A=NULL,# optional: specify A. must have K columns
-                      Amodel="sample", 
+                      Amodel="sample",
+                      tipdist=0,
                       minedge=0)  
 {
     if(is.null(tree)){
@@ -68,12 +70,12 @@ simulateCoalescent=function(N, # Number of individuals
     calX=td
     tcs=colSums(A)
     C=diag(1/tcs)
-    X=calX #%*% t(C)
+    X=tipdist + calX #%*% t(C)
     Y0=A %*% X %*% t(A)
     Y = Y0 * stats::rgamma(N*N,shape=1/(sigma0)^2,rate=1/(sigma0)^2)
     colnames(Y)=rownames(Y)=rownames(A)=paste0("X",1:N)
     list(Y=Y,Y0=Y0,A=A,X=X,calX=calX,
-         tree=tc,sigma0=sigma0,alpha=alpha)
+         tree=tc,sigma0=sigma0,alpha=alpha,tipdist=tipdist,minedge=minedge)
 }
 
 ###############################
@@ -104,8 +106,8 @@ transformCoalescent<-function(sim,multmin=0.1,multmax=2,standardize=TRUE){
     test2$tree$edge.length=test2$tree$edge.length*stats::runif(length(test2$tree$edge.length),multmin,multmax) 
     td=ape::cophenetic.phylo(test2$tree)
     A=test2$A
-    X=td
-    if(standardize)X=X*mean(sim$X)/mean(X)
+    X=td + sim$tipdist
+   if(standardize)X=X*mean(sim$X)/mean(X)
 
     Y0=A %*% X %*% t(A)
     N=dim(A)[1]
@@ -151,6 +153,7 @@ mixCoalescent<-function(sim, beta=0.5,qmin=0.5,transform=TRUE,...){
     ##    tmix=simulateCoalescent(N,K,sim$alpha,sim$sigma0)
     X=test2$X
     A=test2$A
+    X=td + sim$tipdist
     testi=sample(1:K,1)
     talt=which(test2$X[testi,]>=stats::quantile(test2$X[testi,],qmin))
     testi=c(testi,sample(talt,1))
