@@ -18,7 +18,7 @@ check()
 
 
 setwd("/Users/madjl/code/Clarity")
-1install("ClaritySim")
+install("ClaritySim")
 install("Clarity")
 
 ## Make distributable packages

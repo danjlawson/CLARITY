@@ -153,6 +153,7 @@ mixCoalescent<-function(sim, beta=0.5,qmin=0.5,transform=TRUE,...){
     ##    tmix=simulateCoalescent(N,K,sim$alpha,sim$sigma0)
     X=test2$X
     A=test2$A
+    td=ape::cophenetic.phylo(test2$tree)
     X=td + sim$tipdist
     testi=sample(1:K,1)
     talt=which(test2$X[testi,]>=stats::quantile(test2$X[testi,],qmin))
