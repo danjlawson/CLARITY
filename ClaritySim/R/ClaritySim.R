@@ -1,3 +1,41 @@
+###############################
+#' @title Simulate features under a ClaritySim "mixture on a tree model"
+#'
+#' @description
+#' Simulate traits assuming random walk using the cophenetic imposed using the tree. Specifically, data samples are generated that contain drift according to the tree, then a value created by their average mixture from that tree, plus noise
+#'
+#' @param sim a ClaritySim simulation containing a tree
+#' @param L (default NULL meaning take from sim) number of features to simulate
+#' @param sigma (default NULL meaning take from sim) the rate of drift of features per unit coalescence distance
+#' @param sigma0 (default NULL meaning take from sim) the 'individual-level noise' in the trait values after accounting for individual mixtures
+#'
+#' @keywords mixture
+#' @return A ClaritySim object, a list with updated values of
+#' \itemize{
+#' \item D0, the trait values associated with the tips of each branch of the tree
+#' \item D, the trait values associated with each data point
+#' \item Y, the matrix of distances for the samples
+#' \item L, as input
+#' \item sigma, as input
+#' \item sigma0, as input
+#' }
+#' @seealso \code{\link{simulateCoalescent}}
+#' @export
+simData=function(sim,L=NULL,sigma=NULL,sigma0=NULL){
+    if(!is.null(L))sim$L=L
+    if(!is.null(sigma))sim$sigma=sigma
+    if(!is.null(sigma0))sim$sigma0=sigma0
+    sim$D0=sapply(1:sim$L,function(l){
+        ape::rTraitCont(sim$tree,sigma=sim$sigma)
+    })
+    sim$D=t(apply(sim$A,1,function(a){
+        stats::rnorm(sim$L,t(a) %*% sim$D0,sim$sigma0)
+    }))
+    sim$X=as.matrix(stats::dist(sim$D0))
+    sim$Y=as.matrix(stats::dist(sim$D))
+    colnames(sim$Y)=rownames(sim$Y)=rownames(sim$A)
+    sim
+}
 
 ###############################
 #' @title simulate similarities under a coalescent model
@@ -7,42 +45,50 @@
 #' 
 #' @param N Number of samples
 #' @param K Dimension of the latent structure
+#' @param L (default 200) Number of features to generate
 #' @param alpha (default rep(1.5,K) ) structure of calX
-#' @param sigma0 (default 0.1) Noise in the vector (Can be a vector or a scalar)
+#' @param sigma (default 0.1) the rate of drift of features per unit coalescence distance
+#' @param sigma0 (default 0.01) the 'individual-level noise' in the trait values after accounting for mixture
 #' @param A (default NULL) Provide the matrix A, instead of simulating it. If NULL, it is generated from rdirichlet(N,alpha) if alpha>0 
 #' @param tree (default NULL) Provide the tree describing the relationship between the K latent classes
 #' @param Amodel (default: "sample") either "sample" or "uniform" to determine membership of clusters when alpha=0
-#' @param tipdist (default: 0) Distance within tips. Tree distances, including the diagonal, are incremented by this.
 #' @param minedge (default: 0) Minimum branch length. Any edges shorter than minedge are set to minedge, resulting in a non-ultrametric tree.
 #' 
 #' @keywords mixture
-#' @return A list containing:
+#' @return A ClaritySim object, a list containing:
 #' \itemize{
 #' \item Y, an N by N non-negative matrix of similarities
-#' \item Y0, Y but without the noise added
 #' \item A, an N by K non-negative matrix of mixtures
+#' \item D, an N by L matrix of features
+#' \item D0, a K by L matrix of features of latent objects
 #' \item X, a K by K non-negative matrix of similarities between latent objects
+#' \item X, a K by K non-negative matrix of tree distances between latent objects
 #' \item calX, a K by K non-negative matrix of similarities between naturally scaled latent objects
 #' \item tree, the tree that was simulated in \code{\link{rcoal}} output format
 #' \item sigma0 as input
+#' \item sigma as input
 #' \item alpha as input
+#' \item L as input
+#' 
 #' }
 #' @seealso \code{\link{mixCoalescent}}, \code{\link{transformCoalescent}}
 #' @export
 #' @examples
 #' set.seed(1)
-#' mysim<-simulateCoalescent(100,10) # Simlulate 100 objects in a 10 dimensional latent space
+#' # Simulate 100 objects in a 10 dimensional latent space with 200 features
+#' mysim<-simulateCoalescent(100,10,200) 
 #' # This is the data dataraw from Package Clarity
 #' 
 simulateCoalescent=function(N, # Number of individuals
                             K, # Dimension of the latent structure
-                      alpha=rep(0.2,K), # Dirichlet hyperparameter
-                      sigma0=0.01,# Noise in the population vector (Can be a vector or a scalar)
-                      tree=NULL, # optional: specify a tree
-                      A=NULL,# optional: specify A. must have K columns
-                      Amodel="sample",
-                      tipdist=0,
-                      minedge=0)  
+                            L=200, # Number of features
+                            alpha=rep(0.2,K), # Dirichlet hyperparameter
+                            sigma=0.1,# Noise in the creation of features
+                            sigma0=0.01,# Noise in the translation between populations and individuals
+                            tree=NULL, # optional: specify a tree
+                            A=NULL,# optional: specify A. must have K columns
+                            Amodel="sample",
+                            minedge=0)  
 {
     if(is.null(tree)){
         tc=ape::rcoal(K)
@@ -70,12 +116,12 @@ simulateCoalescent=function(N, # Number of individuals
     calX=td
     tcs=colSums(A)
     C=diag(1/tcs)
-    X=tipdist + calX #%*% t(C)
-    Y0=A %*% X %*% t(A)
-    Y = Y0 * stats::rgamma(N*N,shape=1/(sigma0)^2,rate=1/(sigma0)^2)
-    colnames(Y)=rownames(Y)=rownames(A)=paste0("X",1:N)
-    list(Y=Y,Y0=Y0,A=A,X=X,calX=calX,
-         tree=tc,sigma0=sigma0,alpha=alpha,tipdist=tipdist,minedge=minedge)
+    sim=list(A=A,calX=calX,
+             tree=tc,alpha=alpha,minedge=minedge)
+    rownames(sim$A)=paste0("X",1:N)
+    sim<-simData(sim,L,sigma,sigma0)
+    class(sim)="ClaritySim"
+    sim
 }
 
 ###############################
@@ -88,34 +134,22 @@ simulateCoalescent=function(N, # Number of individuals
 #' @param sim A simulated coalescent as returned by \code{\link{simulateCoalescent}}
 #' @param multmin (default 0.1) minimum multiplier for branch edge lengths
 #' @param multmax (default 2) maximum multiplier for branch edge lengths
-#' @param standardize (default TRUE) whether the X distances should be standardized to that of the original matrix
 #' 
 #' @keywords mixture
-#' @return A list containing the same objects as  \code{\link{simulateCoalescent}} with updated X, Y, Y0, tree elements
+#' @return A ClaritySim list containing the same objects as  \code{\link{simulateCoalescent}} with updated X, Y, D tree elements
 #' 
 #' @seealso \code{\link{simulateCoalescent}}, \code{\link{mixCoalescent}}
 #' @export
 #' @examples
 #' set.seed(1)
-#' mysim<-simulateCoalescent(100,10) # Simlulate 100 objects in a 10 dimensional latent space
+#' mysim<-simulateCoalescent(100,10,200) # Simlulate 100 objects in a 10 dimensional latent space with 200 features
 #' similarsim<-transformCoalescent(mysim)
 #' # similarsim$Y is the data datarep from package Clarity
 #' 
-transformCoalescent<-function(sim,multmin=0.1,multmax=2,standardize=TRUE){
-    test2=sim
-    test2$tree$edge.length=test2$tree$edge.length*stats::runif(length(test2$tree$edge.length),multmin,multmax) 
-    td=ape::cophenetic.phylo(test2$tree)
-    A=test2$A
-    X=td + sim$tipdist
-   if(standardize)X=X*mean(sim$X)/mean(X)
-
-    Y0=A %*% X %*% t(A)
-    N=dim(A)[1]
-    Y = Y0 * stats::rgamma(N*N,shape=1/(sim$sigma0)^2,rate=1/(sim$sigma0)^2)
-    test2$X=X
-    test2$Y=Y
-    test2$Y0=Y0
-    test2
+transformCoalescent<-function(sim,multmin=0.1,multmax=2){
+    sim2=sim
+    sim2$tree$edge.length=sim2$tree$edge.length*stats::runif(length(sim2$tree$edge.length),multmin,multmax) 
+    simData(sim2)
 }
 
 
@@ -130,45 +164,52 @@ transformCoalescent<-function(sim,multmin=0.1,multmax=2,standardize=TRUE){
 #' @param beta (default 0.5) amount of mixture to add
 #' @param qmin (default 0.5) quantile of which edges can be linked to. qmin=0 implies any edge can be chosen.
 #' @param transform (default TRUE) whether to pass sim to \code{\link{transformCoalescent}} before mixing
+#' @param fraction (default 1) fraction of the affected cluster to affect with the mixing.
 #' @param ... extra parameters for \code{\link{transformCoalescent}}
 #' 
 #' @keywords mixture
-#' @return A list containing the same objects as  \code{\link{simulateCoalescent}} with updated A, X, Y, Y0, tree elements
+#' @return A list containing the same objects as  \code{\link{simulateCoalescent}} with updated A, X, Y, Y0, tree elements, and additionally:
+#' \itemize{
+#' dest, a list of which rows of A are `destination' nodes for the mixture
+#' source, a list of which rows of A are `source' nodes for the mixture
+#' edges, the named tip indexes of the (dest,source) of the mixture edge
+#' beta, the provided beta
+#' qmin, the provided qmin
+#' }
 #' 
 #' @seealso \code{\link{simulateCoalescent}}, \code{\link{transformCoalescent}}
 #' @export
 #' @examples
 #' set.seed(1)
-#' mysim<-simulateCoalescent(100,10) # Simlulate 100 objects in a 10 dimensional latent space
+#' mysim<-simulateCoalescent(100,10,200) # Simlulate 100 objects in a 10 dimensional latent space with 200 features
 #' similarsim<-transformCoalescent(mysim)
 #' alternatesim<-mixCoalescent(mysim)
 #' # alternatesim$Y is the data datamix from package Clarity
 #' 
 
-mixCoalescent<-function(sim, beta=0.5,qmin=0.5,transform=TRUE,...){
-    N=dim(sim$A)[1]
-    K=dim(sim$A)[2]
-    if(transform)test2=transformCoalescent(sim,...)
-    else test2=sim
-    ##    tmix=simulateCoalescent(N,K,sim$alpha,sim$sigma0)
-    X=test2$X
-    A=test2$A
-    td=ape::cophenetic.phylo(test2$tree)
-    X=td + sim$tipdist
-    testi=sample(1:K,1)
-    talt=which(test2$X[testi,]>=stats::quantile(test2$X[testi,],qmin))
+mixCoalescent<-function(sim, beta=0.5,qmin=0.5,transform=TRUE,fraction=1,...){
+    if(transform)sim2=transformCoalescent(sim,...)
+    else sim2=sim
+    
+    ## Update A
+    A=sim2$A
+    testi=sample(1:dim(A)[2],1)
+    talt=which(sim2$X[testi,]>=stats::quantile(sim2$X[testi,],qmin))
     testi=c(testi,sample(talt,1))
     testix=which(A[,testi[1]]>0)
+    if(fraction<1) testix=sort(sample(testix,size=ceiling(fraction*length(testix))))
     A[testix,testi[2]]=(beta) * A[testix,testi[1]]
     A[testix,testi[1]]=A[testix,testi[1]] * (1-beta)
-    Y0=A %*% X %*% t(A)
-    N=dim(A)[1]
-    Y = Y0 * stats::rgamma(N*N,shape=1/(sim$sigma0)^2,rate=1/(sim$sigma0)^2)
-    test2$A=A
-    test2$X=X
-    test2$Y=Y
-    test2$Y0=Y0
-    test2$beta=beta
-    test2
+    sim2$A=A
+
+    ## Update ClaritySim object
+    sim2$beta=beta
+    sim2$qmin=qmin
+    sim2$edges = testi
+    names(sim2$edges) = sim2$tree$tip.label[sim2$edges]
+    sim2$dest=which(A[,testi[1]]>0)
+    sim2$source=which(A[,testi[2]]>0)
+    sim2$source=sim2$source[!sim2$source%in% sim2$dest]
+    simData(sim2)
 }
 

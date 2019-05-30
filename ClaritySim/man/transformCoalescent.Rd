@@ -4,8 +4,7 @@
 \alias{transformCoalescent}
 \title{rescale similarities of a simulated coalescent to new branch lengths}
 \usage{
-transformCoalescent(sim, multmin = 0.1, multmax = 2,
-  standardize = TRUE)
+transformCoalescent(sim, multmin = 0.1, multmax = 2)
 }
 \arguments{
 \item{sim}{A simulated coalescent as returned by \code{\link{simulateCoalescent}}}
@@ -13,18 +12,16 @@ transformCoalescent(sim, multmin = 0.1, multmax = 2,
 \item{multmin}{(default 0.1) minimum multiplier for branch edge lengths}
 
 \item{multmax}{(default 2) maximum multiplier for branch edge lengths}
-
-\item{standardize}{(default TRUE) whether the X distances should be standardized to that of the original matrix}
 }
 \value{
-A list containing the same objects as  \code{\link{simulateCoalescent}} with updated X, Y, Y0, tree elements
+A ClaritySim list containing the same objects as  \code{\link{simulateCoalescent}} with updated X, Y, D tree elements
 }
 \description{
 Take a simulated tree and multiply each edge length by a random amount to generate a tree with the same topology but different structure.
 }
 \examples{
 set.seed(1)
-mysim<-simulateCoalescent(100,10) # Simlulate 100 objects in a 10 dimensional latent space
+mysim<-simulateCoalescent(100,10,200) # Simlulate 100 objects in a 10 dimensional latent space with 200 features
 similarsim<-transformCoalescent(mysim)
 # similarsim$Y is the data datarep from package Clarity
 

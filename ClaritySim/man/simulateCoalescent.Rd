@@ -4,17 +4,22 @@
 \alias{simulateCoalescent}
 \title{simulate similarities under a coalescent model}
 \usage{
-simulateCoalescent(N, K, alpha = rep(0.2, K), sigma0 = 0.01,
-  tree = NULL, A = NULL, Amodel = "sample", minedge = 0)
+simulateCoalescent(N, K, L = 200, alpha = rep(0.2, K), sigma = 0.1,
+  sigma0 = 0.01, tree = NULL, A = NULL, Amodel = "sample",
+  minedge = 0)
 }
 \arguments{
 \item{N}{Number of samples}
 
 \item{K}{Dimension of the latent structure}
 
+\item{L}{(default 200) Number of features to generate}
+
 \item{alpha}{(default rep(1.5,K) ) structure of calX}
 
-\item{sigma0}{(default 0.1) Noise in the vector (Can be a vector or a scalar)}
+\item{sigma}{(default 0.1) the rate of drift of features per unit coalescence distance}
+
+\item{sigma0}{(default 0.01) the 'individual-level noise' in the trait values after accounting for mixture}
 
 \item{tree}{(default NULL) Provide the tree describing the relationship between the K latent classes}
 
@@ -25,16 +30,21 @@ simulateCoalescent(N, K, alpha = rep(0.2, K), sigma0 = 0.01,
 \item{minedge}{(default: 0) Minimum branch length. Any edges shorter than minedge are set to minedge, resulting in a non-ultrametric tree.}
 }
 \value{
-A list containing:
+A ClaritySim object, a list containing:
 \itemize{
 \item Y, an N by N non-negative matrix of similarities
-\item Y0, Y but without the noise added
 \item A, an N by K non-negative matrix of mixtures
+\item D, an N by L matrix of features
+\item D0, a K by L matrix of features of latent objects
 \item X, a K by K non-negative matrix of similarities between latent objects
+\item X, a K by K non-negative matrix of tree distances between latent objects
 \item calX, a K by K non-negative matrix of similarities between naturally scaled latent objects
 \item tree, the tree that was simulated in \code{\link{rcoal}} output format
 \item sigma0 as input
+\item sigma as input
 \item alpha as input
+\item L as input
+
 }
 }
 \description{
@@ -42,7 +52,7 @@ Simulate a coalescent relationship between K latent objects. Then simulate N sam
 }
 \examples{
 set.seed(1)
-mysim<-simulateCoalescent(100,10) # Simlulate 100 objects in a 10 dimensional latent space
+mysim<-simulateCoalescent(100,10,200) # Simlulate 100 objects in a 10 dimensional latent space with 200 features
 # This is the data dataraw from Package Clarity
 
 }

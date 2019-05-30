@@ -204,8 +204,8 @@ c_multiplicative_fixedK<-function(Y,
                   sigma=0.0001, # Passed to c_initKmeans
                   sigmaY=1e-5, # Passed to c_initKmeans
                   ensurepositive=TRUE, # Check for whether Y is strictly non-negative
-                  fixed=NULL # Do we fix any columns of A?
-                  ) {
+                  fixed=NULL, # Do we fix any columns of A?
+                  ...) {
     if(ensurepositive){
         if(any(Y<0)) {
             stop("ERROR: Some Y values are negative! You can either a) construct a positive Y, e.g. as.matrix(dist(Y)) or using a different construction, or b) set ensurepositive=FALSE in your call to Clarity. However, this may converge less well.")
@@ -409,6 +409,8 @@ c_DecreaseK<-function(Y,A,X){
 #' @param tmax tmax as passed to \code{\link{Clarity_fixedK}}
 #' @param matrixdistmin (default NULL meaning derive from clist) Passed to \code{\link{Clarity_fixedK}}.
 #' @param objectivedistmin (default NULL meaning derive from clist) Passed to \code{\link{Clarity_fixedK}}.
+#' @param alpha (default 0.9) weighting to place on the original solution. Consider increasing if solutions at higher k are not as good as lower k.
+#' @param dirichletbeta (default 1) beta parameter for new solution. 1 means uniform sampling and is appropriate for most circumstances.
 #' @param ... futher parameters to be passed to \code{\link{Clarity_fixedK}}
 #' 
 #' @keywords mixture
@@ -417,7 +419,7 @@ c_DecreaseK<-function(Y,A,X){
 #' @seealso \code{\link{Clarity_Scan}} is the recommended interface for performing  inference on a representation of a single similarity matrix with Clarity.
 #' @export
 #' @examples
-c_ForwardStep<-function(clist,verbose=TRUE,tmax=10000,matrixdistmin=NULL,objectivedistmin=NULL,...){
+c_ForwardStep<-function(clist,verbose=TRUE,tmax=10000,matrixdistmin=NULL,objectivedistmin=NULL,alpha=0.9,dirichletbeta=1,...){
     ## Update states at K+1 using the state at K, and choose the best one to retain
     ## Report the new updated list
     if(class(clist)!="ClarityScan") stop("clist must be of class ClarityScan as returned by Clarity_Scan")
@@ -434,7 +436,7 @@ c_ForwardStep<-function(clist,verbose=TRUE,tmax=10000,matrixdistmin=NULL,objecti
                      verbose=FALSE,...)
         ## Do a new run at an increased K
         init=c_IncreaseK(scan[[i]]$Y,scan[[i]]$A,
-                                scan[[i]]$X,alpha=0.9,dirichletbeta=1)
+                                scan[[i]]$X,alpha=alpha,dirichletbeta=dirichletbeta)
         ret=c_multiplicative_fixedK(scan[[i]]$Y,A=init$A,X=init$X,tmax=tmax,
                      matrixdistmin=matrixdistmin,
                      objectivedistmin=objectivedistmin,

@@ -18,14 +18,21 @@ mixCoalescent(sim, beta = 0.5, qmin = 0.5, transform = TRUE, ...)
 \item{...}{extra parameters for \code{\link{transformCoalescent}}}
 }
 \value{
-A list containing the same objects as  \code{\link{simulateCoalescent}} with updated A, X, Y, Y0, tree elements
+A list containing the same objects as  \code{\link{simulateCoalescent}} with updated A, X, Y, Y0, tree elements, and additionally:
+\itemize{
+dest, a list of which rows of A are `destination' nodes for the mixture
+source, a list of which rows of A are `source' nodes for the mixture
+edges, the named tip indexes of the (dest,source) of the mixture edge
+beta, the provided beta
+qmin, the provided qmin
+}
 }
 \description{
 Take a simulated tree as returned by \code{\link{simulateCoalescent}}, rescale its edges with \code{\link{transformCoalescent}}. Then choose a random edge, and choose another random edge at distance at least the qmin-th quantile away. Mix these edges with amount beta (so beta=0 implies not doing anything) by directly operating on A.
 }
 \examples{
 set.seed(1)
-mysim<-simulateCoalescent(100,10) # Simlulate 100 objects in a 10 dimensional latent space
+mysim<-simulateCoalescent(100,10,200) # Simlulate 100 objects in a 10 dimensional latent space with 200 features
 similarsim<-transformCoalescent(mysim)
 alternatesim<-mixCoalescent(mysim)
 # alternatesim$Y is the data datamix from package Clarity

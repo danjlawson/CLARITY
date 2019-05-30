@@ -39,19 +39,8 @@ library("ClaritySim")
 
 set.seed(1)
 n=100 ; k=10
-nperpop=n/k
-simA=sapply(1:k,function(i){
-    t(sapply(1:nperpop,function(rep){
-        x=rep(0,k); x[i]=1;x
-    }))
-})
-mysim=simulateCoalescent(n,k,sigma0=0.0001,
-                         A=simA,minedge=0.1) # Simlulate 100 objects in a 10 dimensional latent space
-
-myroworder=order(apply(mysim$A,1,which.max))
-mysim$A=mysim$A[myroworder,]
-mysim$Y=mysim$Y[myroworder,myroworder]
-mysim$Y0=mysim$Y0[myroworder,myroworder]
+mysim=simulateCoalescent(n,k,sigma0=0.0001,Amodel="uniform",alpha=0,
+                         minedge=0.1) # Simlulate 100 objects in a 10 dimensional latent space
 
 similarsim<-transformCoalescent(mysim)
 alternatesim<-mixCoalescent(mysim)

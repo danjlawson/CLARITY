@@ -343,6 +343,7 @@ Clarity_Scan <- function(Y, kmax =20,
                          method="SVDX",
                          clist=NULL, verbose=TRUE,
                          ...){
+    if(!is.null(clist)) method=clist$method
     method=c_argmatch(method,c("SVD","SVDX","SVDmix","Multiplicative"))
     if(method=="SVDmix"){
         clist=c_SVD_Scan(Y,kmax,clist,verbose=verbose,...)
