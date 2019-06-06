@@ -8,7 +8,7 @@ c_multiplicative_fixedK(Y, K = NULL, tmax = 10000,
   matrixdistmin = 1e-08, objectivedistmin = 0.001, printskip = 100,
   verbose = TRUE, updateA = TRUE, updateX = TRUE, A = NULL,
   X = NULL, a = 0.9, sigma = 1e-04, sigmaY = 1e-05,
-  ensurepositive = TRUE, fixed = NULL)
+  ensurepositive = TRUE, fixed = NULL, ...)
 }
 \arguments{
 \item{Y}{An N by N non-negative matrix of similarities}

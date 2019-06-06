@@ -5,7 +5,8 @@
 \title{Update a Clarity estimate by scanning over increasing K}
 \usage{
 c_ForwardStep(clist, verbose = TRUE, tmax = 10000,
-  matrixdistmin = NULL, objectivedistmin = NULL, ...)
+  matrixdistmin = NULL, objectivedistmin = NULL, alpha = 0.9,
+  dirichletbeta = 1, ...)
 }
 \arguments{
 \item{clist}{A list of Clarity objects as returned by \code{\link{Clarity_Scan}}}
@@ -17,6 +18,10 @@ c_ForwardStep(clist, verbose = TRUE, tmax = 10000,
 \item{matrixdistmin}{(default NULL meaning derive from clist) Passed to \code{\link{Clarity_fixedK}}.}
 
 \item{objectivedistmin}{(default NULL meaning derive from clist) Passed to \code{\link{Clarity_fixedK}}.}
+
+\item{alpha}{(default 0.9) weighting to place on the original solution. Consider increasing if solutions at higher k are not as good as lower k.}
+
+\item{dirichletbeta}{(default 1) beta parameter for new solution. 1 means uniform sampling and is appropriate for most circumstances.}
 
 \item{...}{futher parameters to be passed to \code{\link{Clarity_fixedK}}}
 }

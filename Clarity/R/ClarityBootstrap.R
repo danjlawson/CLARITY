@@ -1,4 +1,19 @@
 ###############################
+#' @title Standard Distance function for Clarity
+#'
+#' @description
+#' Computes the euclidean distance between all points using as.matrix(dist(x)). Provided to provide an example for user-defined dissimilarity functions.
+#' 
+#' @param x An N by K matrix of N subjects observed at K features
+#' 
+#' @return An N by N matrix of the distances
+#' @export
+#' 
+c_dist=function(x){
+    as.matrix(stats::dist(x))
+}
+
+###############################
 #' @title Compute the standardized divergence between a prediction and the model from which it was built
 #'
 #' @description
@@ -115,14 +130,14 @@ Clarity_Persistence=function(clist,f="RowSumsSquared",what="Yresid",summary=abs)
 #'
 #' @param D an N by L matrix containing N data items and L features. The features are resampled with replacement.
 #' @param clearned either a ClarityScan or Clarity object. If a Clarity object, then residuals will be bootstrapped. If a ClarityScan object then Persistence will be bootstrapped, unless a specific k is given in which case Residuals are again calculated.
-#' @param nbb Number of bootstraps (default: 100)
+#' @param nbs Number of bootstraps (default: 100)
 #' @param k If specified and clearned is a ClarityScan object, residuals for this k are bootstrapped. (default: NULL, meaning use Persistences)
 #' @param distfn Distance function to apply to the bootstrapped data, which should return a similarity or dissimilarity matrix. Default: c_dist, which is as,matrix(dist(x)).
-#' @param summary (default=abs) Summarisation of the bootstrapped value when extracting Residuals. Default: abs, which allows residuals to be easily compared. Use summary=I to return the raw data. See \code{\link{Clarity_Extract)).
-#' @param diag (default=0) diagonal value to be applied when extracting Residuals. See \code{\link{Clarity_Extract)).
+#' @param summary (default=abs) Summarisation of the bootstrapped value when extracting Residuals. Default: abs, which allows residuals to be easily compared. Use summary=I to return the raw data. See \code{\link{Clarity_Extract}}.
+#' @param diag (default=0) diagonal value to be applied when extracting Residuals. See \code{\link{Clarity_Extract}}.
 #' @param seed Seed to reset the random number generator with. Default: NULL, meaning don't reset.
 #' @param verbose Whether to print to screen each iteration. Default: FALSE
-#' @param ... Additional parameters to \code{\link{Clarity_Persistence)) (not required for normal usage)
+#' @param ... Additional parameters to \code{\link{Clarity_Persistence}} (not required for normal usage)
 #' @return A list of length nbs, each containing a matrix
 #' @export
 Clarity_Bootstrap<-function(D,clearned,nbs=100,k=NULL,distfn=c_dist,summary=abs,diag=0,seed=NULL,verbose=FALSE,...){
@@ -142,7 +157,7 @@ Clarity_Bootstrap<-function(D,clearned,nbs=100,k=NULL,distfn=c_dist,summary=abs,
             if(class(clearned)=="ClarityScan") cbs=Clarity_Predict(Ybs,clearned$scan[[k]])
             if(class(clearned)=="Clarity") cbs=Clarity_Predict(Ybs,clearned)
             return(Clarity_Extract(cbs,summary=summary,diag=diag))
-        }            
+        }
     })
     bspers
 }
@@ -155,7 +170,7 @@ Clarity_Bootstrap<-function(D,clearned,nbs=100,k=NULL,distfn=c_dist,summary=abs,
 #'
 #' Note that when population="bestrow" a conservative test is applied in which the best B bootstrap values from the entire column is used as the null distribution. This is appropriate for testing Persistences extracted via \code{\link{Clarity_Persistence}}.
 #'
-#' @param testbs A list of bootstrapped matrices as returned from \code{\link{Clarity_Bootsrap}}
+#' @param testbs A list of bootstrapped matrices as returned from \code{\link{Clarity_Bootstrap}}
 #' @param obs A matrix of observed values
 #' @param population (default="element") whether the population being compared to is the "element" X[i,j], or "bestcol": the B best values in the "column" X[,i]
 #' @param comparison (default=function(x,o){sum(o>x)/(length(x)+1)}) a function to score the observed value relative to the bootstraped values.
@@ -176,11 +191,16 @@ Clarity_BScompare=function(testbs,obs,population="element",
         tobs=t(obs) # Transpose before we start, since we need to iterate over columns
         ret=(sapply(1:dim(tobs)[1],function(i){
             b1=as.numeric(sapply(testbs,function(x)x[,i]))
-            b1=head(sort(b1,decreasing=TRUE),length(testbs))
+            b1=utils::head(sort(b1,decreasing=TRUE),length(testbs))
             sapply(1:dim(tobs)[2],function(j){
                 comparison(b1,tobs[i,j])
             })
         }))
     }else(stop("Invalid population in Clarity_BScompare"))
+    if(class(ret)=="matrix") {
+        rownames(ret)=rownames(obs)
+    }else{
+        names(ret)=rownames(obs)
+    }
     return(ret)
 }
