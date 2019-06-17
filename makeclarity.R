@@ -1,4 +1,3 @@
-q("no")
 
 library("devtools")
 library(roxygen2)
@@ -10,12 +9,10 @@ setwd("Clarity")
 document()
 check()
 
-setwd("..")
-
+setwd("/Users/madjl/code/Clarity")
 setwd("ClaritySim")
 document()
 check()
-
 
 setwd("/Users/madjl/code/Clarity")
 install("ClaritySim")
@@ -28,6 +25,7 @@ system("tar -czvf ClaritySim.tar.gz ClaritySim")
 install.packages("ClaritySim.tar.gz",repos = NULL, type="source")
 install.packages("Clarity.tar.gz",repos = NULL, type="source")
 
+q("no")
 q("no")
 library("Clarity")
 library("ClaritySim")
@@ -52,7 +50,9 @@ system("mkdir -p Clarity/data")
 save(dataraw,file="Clarity/data/dataraw.RData")
 save(datarep,file="Clarity/data/datarep.RData")
 save(datamix,file="Clarity/data/datamix.RData")
-save(mysim,similarsim,alternatesim,file="Clarity_AdditionalData.RData")
+##save(mysim,similarsim,alternatesim,file="Clarity_AdditionalData.RData")
+
+
 ##############################
 ## Basic Clarity usage
 

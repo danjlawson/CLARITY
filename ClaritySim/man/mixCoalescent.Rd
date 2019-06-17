@@ -4,7 +4,8 @@
 \alias{mixCoalescent}
 \title{Add a mixture edge to a coalescent for use in Clarity}
 \usage{
-mixCoalescent(sim, beta = 0.5, qmin = 0.5, transform = TRUE, ...)
+mixCoalescent(sim, beta = 0.5, qmin = 0.5, transform = TRUE,
+  fraction = 0.5, ...)
 }
 \arguments{
 \item{sim}{A simulated coalescent as returned by \code{\link{simulateCoalescent}}}
@@ -14,6 +15,8 @@ mixCoalescent(sim, beta = 0.5, qmin = 0.5, transform = TRUE, ...)
 \item{qmin}{(default 0.5) quantile of which edges can be linked to. qmin=0 implies any edge can be chosen.}
 
 \item{transform}{(default TRUE) whether to pass sim to \code{\link{transformCoalescent}} before mixing}
+
+\item{fraction}{(default 0.5) fraction (rounded up) of the affected cluster to affect with the mixing. When fraction=0 or 1 then technically the effect is a relationship change (although sometimes this can still only be modelled at k)}
 
 \item{...}{extra parameters for \code{\link{transformCoalescent}}}
 }

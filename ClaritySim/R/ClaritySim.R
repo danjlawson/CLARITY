@@ -33,6 +33,7 @@ simData=function(sim,L=NULL,sigma=NULL,sigma0=NULL){
     }))
     sim$X=as.matrix(stats::dist(sim$D0))
     sim$Y=as.matrix(stats::dist(sim$D))
+    colnames(sim$X)=rownames(sim$X)=sim$tree$tip.label
     colnames(sim$Y)=rownames(sim$Y)=rownames(sim$A)
     sim
 }
@@ -116,9 +117,11 @@ simulateCoalescent=function(N, # Number of individuals
     calX=td
     tcs=colSums(A)
     C=diag(1/tcs)
+    tc$tip.label=colnames(A)=rownames(calX)=colnames(calX)=paste0("t",1:K)
+    rownames(A)=paste0("X",1:N)
     sim=list(A=A,calX=calX,
              tree=tc,alpha=alpha,minedge=minedge)
-    rownames(sim$A)=paste0("X",1:N)
+
     sim<-simData(sim,L,sigma,sigma0)
     class(sim)="ClaritySim"
     sim
@@ -164,7 +167,7 @@ transformCoalescent<-function(sim,multmin=0.1,multmax=2){
 #' @param beta (default 0.5) amount of mixture to add
 #' @param qmin (default 0.5) quantile of which edges can be linked to. qmin=0 implies any edge can be chosen.
 #' @param transform (default TRUE) whether to pass sim to \code{\link{transformCoalescent}} before mixing
-#' @param fraction (default 1) fraction of the affected cluster to affect with the mixing.
+#' @param fraction (default 0.5) fraction (rounded up) of the affected cluster to affect with the mixing. When fraction=0 or 1 then technically the effect is a relationship change (although sometimes this can still only be modelled at k)
 #' @param ... extra parameters for \code{\link{transformCoalescent}}
 #' 
 #' @keywords mixture
@@ -187,7 +190,7 @@ transformCoalescent<-function(sim,multmin=0.1,multmax=2){
 #' # alternatesim$Y is the data datamix from package Clarity
 #' 
 
-mixCoalescent<-function(sim, beta=0.5,qmin=0.5,transform=TRUE,fraction=1,...){
+mixCoalescent<-function(sim, beta=0.5,qmin=0.5,transform=TRUE,fraction=0.5,...){
     if(transform)sim2=transformCoalescent(sim,...)
     else sim2=sim
     

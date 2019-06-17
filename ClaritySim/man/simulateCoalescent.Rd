@@ -52,7 +52,8 @@ Simulate a coalescent relationship between K latent objects. Then simulate N sam
 }
 \examples{
 set.seed(1)
-mysim<-simulateCoalescent(100,10,200) # Simlulate 100 objects in a 10 dimensional latent space with 200 features
+# Simulate 100 objects in a 10 dimensional latent space with 200 features
+mysim<-simulateCoalescent(100,10,200) 
 # This is the data dataraw from Package Clarity
 
 }
