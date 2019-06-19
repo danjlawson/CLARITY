@@ -48,8 +48,32 @@ Clarity_ObjectivePlot(clist, add = FALSE, legendloc = "bottomleft",
 \item{...}{Additional parameters to plot}
 }
 \value{
-the desired plot symbol
+an invisble list of the used plot symbols for each curve
 }
 \description{
 Makes a plot of (objective function) against (k) for all ClarityScan objects, automatically doing sensible things with color, line type, legend, etc. For most arguments, try passing vectors of length P=number of plots to make.
+}
+\examples{
+\donttest{
+scan=Clarity_Scan(dataraw) ## Core Clarity
+predmix=Clarity_Predict(datamix,scan) ## Core prediction
+predrep=Clarity_Predict(datarep,scan) 
+
+scanmix=Clarity_Scan(datamix)
+scanrep=Clarity_Scan(datarep)
+## Plot the objectives
+Clarity_ObjectivePlot(list(scan=scan,
+                           scanmix=scanmix,
+                           scanrep=scanrep,
+                           predrep=predrep,
+                           predmix=predmix),
+                      col=c(1,2,3,2,3),
+                      lty=c(1,1,1,2,2),
+                      ylim=c(1e1,5e4),
+                      las=1,
+                      log="y")
+}
+}
+\seealso{
+\code{\link{plot.ClarityScan}} for the main plotting interface for persistences.
 }

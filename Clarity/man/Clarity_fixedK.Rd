@@ -40,7 +40,6 @@ Learn a mixture model representation of a provided similarity matrix Y using Cla
 \donttest{
 scansvd=Clarity_fixedK(dataraw,3) # Use the SVD method
 scanmult=Clarity_fixedK(dataraw,3,method="M") # Use the Multiplicative method
-scanraw=Clarity_Scan(dataraw,clist=scanraw) # Run it for longer
 }
 }
 \seealso{

@@ -41,7 +41,9 @@ c_multiplicative_fixedK(Y, K = NULL, tmax = 10000,
 
 \item{ensurepositive}{(default TRUE) Whether we restrict to non-negative Y. Note that the algorithm can work with some negative Y as long as it is postitive semi-definite, but this can still lead to convergence problems.}
 
-\item{fixed}{(efault NULL) which columns to keep structurally fixed. Not yet used.}
+\item{fixed}{(default NULL) which columns to keep structurally fixed. Not yet used.}
+
+\item{...}{Additional arguments (which will be ignored)}
 }
 \value{
 A list of class "Clarity" containing the following:

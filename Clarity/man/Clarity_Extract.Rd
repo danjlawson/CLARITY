@@ -10,7 +10,7 @@ Clarity_Extract(cscan, what = "Yresid", summary = abs, diag = 0,
 \arguments{
 \item{cscan}{A Clarity or ClarityScan object}
 
-\item{what}{(default="Yresid") the object to extract}
+\item{what}{(default="Yresid") the object to extract. If a number and cscan is a ClarityScan object, returns the associated Clarity object. If it is the string "Rsq" return the square residuals.}
 
 \item{summary}{(default=abs) any summary to apply to the result. abs is useful to create residuals that rank naturally.}
 
@@ -22,7 +22,18 @@ Clarity_Extract(cscan, what = "Yresid", summary = abs, diag = 0,
 A list containing what for each k in the ClarityScan
 }
 \description{
-Extract objects such as the Yresid residuals from a ClarityScan object. This is useful for constructing Persistences or similar. Also provides a standardized interface to extract the absolute value of residuals.
+Extract objects such as Clarity objects or residuals from a ClarityScan object. This is useful for constructing Persistences or similar. Also provides a standardized interface to extract the absolute value of residuals.
+}
+\examples{
+\donttest{
+scan=Clarity_Scan(dataraw)
+e1=Clarity_Extract(scan) # Get a list containing the absolute residual matrices for each k
+e2=Clarity_Extract(scan,what=5) # get the 5th Clarity object
+e3=Clarity_Extract(scan,summary=I,k=5) # get the 5th Residual matrix
+e4=Clarity_Extract(scan,summary=I,k=5) # get the 5th Residual matrix
+e5=Clarity_Extract(scan,"Rsq",k=5) # get the 5th square residual matrix
+e6=Clarity_Extract(scan,"Rsq") # Get a list containing the R squared matrix for each k
+}
 }
 \seealso{
 \code{\link{Clarity_Persistence}} to which you can pass

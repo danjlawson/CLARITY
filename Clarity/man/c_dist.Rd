@@ -15,3 +15,6 @@ An N by N matrix of the distances
 \description{
 Computes the euclidean distance between all points using as.matrix(dist(x)). Provided to provide an example for user-defined dissimilarity functions.
 }
+\seealso{
+\code{\link{Clarity_Bootstrap}}, which takes an argument distfn which can be given this or another function that generates a similarity from feature data.
+}

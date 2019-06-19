@@ -43,12 +43,16 @@ An object of class "ClarityScan", which is a list containing the following:
 Learn a mixture model representation of a provided similarity matrix Y using Clarity. You may either choose the maximum number of components to use, kmax, or provide a pre-existing list of
 }
 \examples{
-\donttest{
-scanraw=Clarity_Scan(dataraw) # Generate an initial run
-scanraw=Clarity_Scan(dataraw,clist=scanraw) # Run it for longer
+\dontrun{
+## This can be quite slow (a few minutes)
+
+# Generate an initial run
+scanraw=Clarity_Scan(dataraw,method="Multiplicative") 
+# Run it for longer:
+scanraw=Clarity_Scan(dataraw,clist=scanraw)
 }
 }
 \seealso{
-\code{\link{Clarity_fixedK}} is used at each K, and documents the important parameters. \code{\link{c_ScanOnly}} is used to generate the initial ClarityScan object independently for each K.
+\code{\link{Clarity_Scan}} explains what can be done with this and is the recommended interface (see example). \code{\link{Clarity_fixedK}} is used at each K, and documents the important parameters. \code{\link{c_ScanOnly}} is used to generate the initial ClarityScan object independently for each K.
 }
 \keyword{mixture}

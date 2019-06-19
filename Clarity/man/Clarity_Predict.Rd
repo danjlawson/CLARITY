@@ -29,6 +29,6 @@ scanmixfromraw=Clarity_Predict(datamix,clist=scanraw)
 }
 }
 \seealso{
-\code{\link{Clarity_Scan}} to generate an estimate for clist to be used here.
+\code{\link{Clarity_Scan}} to generate an estimate for clist to be used here, \code{\link{plot.Clarity}} and \code{\link{plot.ClarityScan}} for plotting.
 }
 \keyword{mixture}

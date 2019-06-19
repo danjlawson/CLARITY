@@ -5,7 +5,7 @@
 \title{Compute the Persistence of a ClarityScan object}
 \usage{
 Clarity_Persistence(clist, f = "RowSumsSquared", what = "Yresid",
-  summary = abs)
+  summary = abs, diag = 0)
 }
 \arguments{
 \item{clist}{A ClarityScan object, or a list of matrices}
@@ -15,14 +15,27 @@ Clarity_Persistence(clist, f = "RowSumsSquared", what = "Yresid",
 \item{what}{(Default="Yresid") What to extract from the ClarityScan object. "Y" and "prediction" can be extracted.}
 
 \item{summary}{(Default=abs) Summary to be applied to the extracted matrices.}
+
+\item{diag}{(Default=0) Special values to give the diagonal. NULL leaves them unchanged, 0 removes from the persisetence measure. See \code{\link{Clarity_Extract}}.}
 }
 \value{
-$f$ evaluated at each $k$, which results in an $N$ by $k$ matrix by default (where $N$ is the number of data items and $k$ is the maximum complexity)
+f evaluated at each k, which results in an N by k matrix by default (where N is the number of data items and k is the maximum complexity)
 }
 \description{
 Perform an operation on a list of matrices in order to compute a Persistence Structure. By default, it computes
-$$P_{ik} = \sum_{j=1^}N (Y_{ij} - \hat{Y}^k_{ij})^2$$
-in the notation of Lawson et al 2019 CLARITY paper, where $Y$ is the provided data matrix and $\hat{Y}^k$ is the predicted matrix at complexity $k$.
+\eqn{P_{ik} = \sum_{j=1^}N (Y_{ij} - \hat{Y}^k_{ij})^2}
+in the notation of Lawson et al 2019 CLARITY paper, where Y is the provided data matrix and \eqn{\hat{Y}^k} is the predicted matrix at complexity k.
+}
+\examples{
+\donttest{
+scan=Clarity_Scan(dataraw) ## Core Clarity
+predmix=Clarity_Predict(datamix,scan)
+p=Clarity_Persistence(scan) # extract persistence
+p2=Clarity_Persistence(predmix) # extract persistence from ClarityScan
+par(mfrow=c(1,2))
+Clarity_Chart(p,main="Learned persistence") # p is a matrix 
+Clarity_Chart(p2,main="Different topology persistence") # p2 is a matrix
+}
 }
 \seealso{
 \code{\link{Clarity_Extract}}

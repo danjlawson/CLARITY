@@ -35,6 +35,11 @@ c_simpleSVD_fixedK <- function(Ysvd,Y,k,verbose=TRUE,Xtype="X"){
     objective=sum((Y - Yhat)^2)
     ret=list(A=A,X=X,prediction=Yhat,
              Y=Y,k=k,Yresid=Yresid,objective=objective)
+    if(Xtype=="X"){
+        ret$method="SVDX"
+    }else{
+        ret$method="SVD"
+    }
     class(ret)="Clarity"
     return(ret)
 }
@@ -83,6 +88,11 @@ c_simpleSVD_Scan <- function(Y,kmax=NULL,Ysvd=NULL,verbose=TRUE,Xtype="X"){
     ret$Y=Y
     ret$kmax=kmax
     ret$Ysvd=Ysvd
+    if(Xtype=="X") {
+        ret$method="SVDX"
+    }else {
+        ret$method="SVD"
+    }
     class(ret)="ClarityScan"
     return(ret)
 }

@@ -35,19 +35,29 @@ An object of class "ClarityScan", which is a list containing:
 Learn a mixture model representation of a provided similarity or distance matrix Y using Clarity.
 
 Several methods are available:
-* "SVDX": A fast method that provides high quality predictions and zero fuss. Uses \code{\link{c_simpleSVD_Scan}} and can tolerate asymmetric Y.
-* "SVD": A fast method that provides high quality predictions and zero fuss. Uses \code{\link{c_simpleSVD_Scan}} using the SVD singluar value matrix for X, assuming symmetry.
-* "SVDmix": A relatively fast method that provides high quality predictions based on forming a mixture around an SVD. Uses \code{\link{c_SVD_Scan}}.
-* "Multiplicative": A slower method that tries to find a minimum volume encolosing simplex for the data, making the output into a legititate mixture solution with additional assumptions. Uses \code{\link{Clarity_Multiplicative_Scan}}.
+\itemize{
+\item "SVDX": A fast method that provides high quality predictions and zero fuss. Uses \code{\link{c_simpleSVD_Scan}} and can tolerate asymmetric Y.
+\item "SVD": A fast method that provides high quality predictions and zero fuss. Uses \code{\link{c_simpleSVD_Scan}} using the SVD singluar value matrix for X, assuming symmetry.
+\item "SVDmix": A relatively fast method that provides high quality predictions based on forming a mixture around an SVD. Uses \code{\link{c_SVD_Scan}}.
+\item "Multiplicative": A slower method that tries to find a minimum volume encolosing simplex for the data, making the output into a legititate mixture solution with additional assumptions. Uses \code{\link{Clarity_Multiplicative_Scan}}.
+}
 }
 \examples{
 \donttest{
-scansvd=Clarity_Scan(dataraw) # SVD method model fit
+scan=Clarity_Scan(dataraw) # SVD method model fit
+## Onward analysis:
+predmix=Clarity_Predict(datamix,scan) ## Core prediction
+## Bootstrap based on arbitrary resampling scheme
+scanbootstrap=Clarity_Bootstrap(scan,D=dataraw)
+## Core persistence plot
+plot(predmix,signif=scanbootstrap)
+}
+\dontrun{
 scanmult=Clarity_Scan(dataraw,method="M") # Multiplicative method model fit
 scanmult=Clarity_Scan(dataraw,method="M",clist=scanmult) # Iterate the Multiplicative method longer
 }
 }
 \seealso{
-\code{\link{Clarity_fixedK}} for the details of what a "Clarity" object is. \code{\link{Clarity_Predict}} to make an initial prediction of the new data.
+\code{\link{Clarity_fixedK}} for the details of what a "Clarity" object is. \code{\link{Clarity_Predict}} to make an initial prediction of the new data. \code{\link{plot.ClarityScan}} for plotting, \code{\link{Clarity_Bootstrap}} for quantifying uncertainty. \code{\link{Clarity_ObjectivePlot}} for comparing quality of fit as a function of \code{k}.
 }
 \keyword{mixture}

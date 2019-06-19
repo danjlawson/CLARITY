@@ -21,7 +21,7 @@
 #' @return A non-negative matrix of dimension K by K
 #' @seealso c_updateX
 #' @export
-#' @examples
+#' 
 c_updateX_solve<-function(A,Y){
     tAAinv=try(
         solve(t(A)%*% A),silent=TRUE)
@@ -52,7 +52,7 @@ c_updateX_solve<-function(A,Y){
 #' @return A non-negative matrix of dimension K by K
 #' @seealso c_updateX
 #' @export
-#' @examples
+#' 
 c_Robust_updateX_solve <- function(A,Y){
     ## Robustly find a solution for X in Y =A X t(A), falling back to the generalised inverse if needed
     Xsol=try(c_updateX_solve(A,Y),silent=TRUE)
@@ -90,7 +90,7 @@ c_Robust_updateX_solve <- function(A,Y){
 #' }
 #' 
 #' @export
-#' @examples
+#' 
 c_calXfromX<-function(A,X){
     tcs=colSums(A)
     C=diag(1/tcs,nrow=dim(X)[1],ncol=dim(X)[2])
@@ -113,7 +113,7 @@ c_calXfromX<-function(A,X){
 #' @return A numeric value of the objective function
 #' 
 #' @export
-#' @examples
+#' 
 c_objectivefunction=function(A,X,Y){
     Yhat=A %*% X %*% t(A) 
     sum((Y - Yhat)^2)
@@ -132,7 +132,7 @@ c_objectivefunction=function(A,X,Y){
 #' @return A numeric vector of length equal to the length of clist, containing the objective function evaluations
 #' 
 #' @export
-#' @examples
+#' 
 c_listscore=function(clist){
     if(class(clist)!="ClarityScan") stop("clist must be of class ClarityScan as returned by Clarity_Scan")
     sapply(clist$scan,function(x)c_objectivefunction(x$A,x$X,x$Y))
@@ -173,7 +173,6 @@ c_listscore=function(clist){
 #' \donttest{
 #' scansvd=Clarity_fixedK(dataraw,3) # Use the SVD method
 #' scanmult=Clarity_fixedK(dataraw,3,method="M") # Use the Multiplicative method
-#' scanraw=Clarity_Scan(dataraw,clist=scanraw) # Run it for longer
 #' }
 Clarity_fixedK <- function(Y,k,method="SVD",verbose=TRUE,...){
     eargs=as.list(match.call())
@@ -208,7 +207,7 @@ Clarity_fixedK <- function(Y,k,method="SVD",verbose=TRUE,...){
 #' @keywords mixture
 #' @return An object of the same class as clist provided, with updated Y, X and derived features.
 #' 
-#' @seealso \code{\link{Clarity_Scan}} to generate an estimate for clist to be used here.
+#' @seealso \code{\link{Clarity_Scan}} to generate an estimate for clist to be used here, \code{\link{plot.Clarity}} and \code{\link{plot.ClarityScan}} for plotting.
 #' @export
 #' @examples
 #' \donttest{
@@ -251,7 +250,8 @@ Clarity_Predict<-function(Ynew,clist,Ysvd=NULL) {
 #' @description
 #' Extend a ClarityScan that has been fitted to new data, to additionally fit the residuals of that data.
 #' First call \code{\link{Clarity_Predict}} to fit the object to the new data, then call this to fit the residuals.
-#' XXXX MUST PROVIDE SOME ANALYSIS
+#'
+#' This function is not yet ready for production.
 #'
 #' Currently only \code{\link{c_SVD_ResidualExtend}} is available as a method.
 #' 
@@ -280,13 +280,6 @@ Clarity_Predict<-function(Ynew,clist,Ysvd=NULL) {
 #' }
 #' 
 #' @seealso \code{\link{Clarity_Scan}} to generate an estimate for clist to be used here, and \code{\link{Clarity_Predict}} to make an initial prediction of the new data.
-#' @export
-#' @examples
-#' \donttest{
-#' scansvd=Clarity_Scan(dataraw) # Generate an initial run
-#' predsvd=Clarity_Predict(datamix,scansvd) # Predict it into the mixed up data
-#' extendsvd=Clarity_Extend(datamix,scansvd) # Extend the model to additionally fit the 
-#' }
 Clarity_Extend <- function(clist,kmax=10,
                            extend="Residual",method="SVD",
                            verbose=TRUE){
@@ -307,11 +300,12 @@ Clarity_Extend <- function(clist,kmax=10,
 #' Learn a mixture model representation of a provided similarity or distance matrix Y using Clarity.
 #'
 #' Several methods are available:
-#' * "SVDX": A fast method that provides high quality predictions and zero fuss. Uses \code{\link{c_simpleSVD_Scan}} and can tolerate asymmetric Y.
-#' * "SVD": A fast method that provides high quality predictions and zero fuss. Uses \code{\link{c_simpleSVD_Scan}} using the SVD singluar value matrix for X, assuming symmetry.
-#' * "SVDmix": A relatively fast method that provides high quality predictions based on forming a mixture around an SVD. Uses \code{\link{c_SVD_Scan}}.
-#' * "Multiplicative": A slower method that tries to find a minimum volume encolosing simplex for the data, making the output into a legititate mixture solution with additional assumptions. Uses \code{\link{Clarity_Multiplicative_Scan}}.
-#'
+#' \itemize{
+#' \item "SVDX": A fast method that provides high quality predictions and zero fuss. Uses \code{\link{c_simpleSVD_Scan}} and can tolerate asymmetric Y.
+#' \item "SVD": A fast method that provides high quality predictions and zero fuss. Uses \code{\link{c_simpleSVD_Scan}} using the SVD singluar value matrix for X, assuming symmetry.
+#' \item "SVDmix": A relatively fast method that provides high quality predictions based on forming a mixture around an SVD. Uses \code{\link{c_SVD_Scan}}.
+#' \item "Multiplicative": A slower method that tries to find a minimum volume encolosing simplex for the data, making the output into a legititate mixture solution with additional assumptions. Uses \code{\link{Clarity_Multiplicative_Scan}}.
+#' }
 #' 
 #' @param Y The similarity or distance matrix to be fitted. In principle any square matrix is allowed but algorithmically you may have problems if it is non-negative or rank-deficient.
 #' @param kmax (default: 20): The maximum number of mixture components to be considered. All values less than this are explored
@@ -331,11 +325,19 @@ Clarity_Extend <- function(clist,kmax=10,
 #' \item ... Additional method-specific details (e.g. Ysvd for method="SVD")
 #' }
 
-#' @seealso  \code{\link{Clarity_fixedK}} for the details of what a "Clarity" object is. \code{\link{Clarity_Predict}} to make an initial prediction of the new data. 
+#' @seealso  \code{\link{Clarity_fixedK}} for the details of what a "Clarity" object is. \code{\link{Clarity_Predict}} to make an initial prediction of the new data. \code{\link{plot.ClarityScan}} for plotting, \code{\link{Clarity_Bootstrap}} for quantifying uncertainty. \code{\link{Clarity_ObjectivePlot}} for comparing quality of fit as a function of \code{k}.
 #' @export
 #' @examples
 #' \donttest{
-#' scansvd=Clarity_Scan(dataraw) # SVD method model fit
+#' scan=Clarity_Scan(dataraw) # SVD method model fit
+#' ## Onward analysis:
+#' predmix=Clarity_Predict(datamix,scan) ## Core prediction
+#' ## Bootstrap based on arbitrary resampling scheme
+#' scanbootstrap=Clarity_Bootstrap(scan,D=dataraw)
+#' ## Core persistence plot
+#' plot(predmix,signif=scanbootstrap)
+#' }
+#' \dontrun{
 #' scanmult=Clarity_Scan(dataraw,method="M") # Multiplicative method model fit
 #' scanmult=Clarity_Scan(dataraw,method="M",clist=scanmult) # Iterate the Multiplicative method longer
 #' }
@@ -343,8 +345,11 @@ Clarity_Scan <- function(Y, kmax =20,
                          method="SVDX",
                          clist=NULL, verbose=TRUE,
                          ...){
-    if(!is.null(clist)) method=clist$method
-    method=c_argmatch(method,c("SVD","SVDX","SVDmix","Multiplicative"))
+    if(!is.null(clist)) {
+        method=clist$method
+    }else{
+        method=c_argmatch(method,c("SVD","SVDX","SVDmix","Multiplicative"))
+    }
     if(method=="SVDmix"){
         clist=c_SVD_Scan(Y,kmax,clist,verbose=verbose,...)
     }else if(method=="SVD"){

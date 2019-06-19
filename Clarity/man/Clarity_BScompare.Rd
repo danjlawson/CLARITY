@@ -5,16 +5,19 @@
 \title{Compare Observed to Bootstrap values}
 \usage{
 Clarity_BScompare(testbs, obs, population = "element",
-  comparison = function(x, o) {     sum(c(x, o) >= o)/(length(x) + 1) })
+  comparison = function(x, o) {     sum(c(x, o) >= o)/(length(x) + 1) },
+  ...)
 }
 \arguments{
-\item{testbs}{A list of bootstrapped matrices as returned from \code{\link{Clarity_Bootsrap}}}
+\item{testbs}{A list of bootstrapped matrices as returned from \code{\link{Clarity_Bootstrap}}}
 
-\item{obs}{A matrix of observed values}
+\item{obs}{Either a Clarity object (for comparing residuals), A ClarityScan object (for comparing persistences) or a matrix of observed values (absolute residuals or persistences, respectively)}
 
 \item{population}{(default="element") whether the population being compared to is the "element" X[i,j], or "bestcol": the B best values in the "column" X[,i]}
 
 \item{comparison}{(default=function(x,o){sum(o>x)/(length(x)+1)}) a function to score the observed value relative to the bootstraped values.}
+
+\item{...}{Additional parameters to \code{\link{Clarity_Persistence}}, if provided with a ClarityScan object.}
 }
 \value{
 A matrix of the same shape as obs, containing the result of comparison applied to each element
@@ -23,7 +26,37 @@ A matrix of the same shape as obs, containing the result of comparison applied t
 For each element in an observed matrix, extract out the corresponding elements in a list of bootstrapped versions of that matrix. Report on the position of the observed value relative to the bootstrapped values. By default this returns the results in the form of a p-value for a test with the alternative that the observed value is larger than the bootstraps (and the null that it is not)
 
 Note that when population="bestrow" a conservative test is applied in which the best B bootstrap values from the entire column is used as the null distribution. This is appropriate for testing Persistences extracted via \code{\link{Clarity_Persistence}}.
+
+Also note that for normal use you might just want to use \code{\link{plot.Clarity}} or \code{\link{plot.ClarityScan}}, both of which use this function for you.
+}
+\examples{
+\donttest{
+scan=Clarity_Scan(dataraw) ## Core Clarity
+predmix=Clarity_Predict(datamix,scan) ## Core prediction
+
+## Bootstrap persistences:
+scanbootstrap=Clarity_Bootstrap(scan,D=datarawD)
+## Extract observed persistences
+P=Clarity_Persistence(predmix)
+## Compute pvalues
+pvals=Clarity_BScompare(scanbootstrap,P)
+## pvals is a matrix of dimension N by K
+signif=pvals<0.01
+## signif is a logical matrix of dimension N by K
+
+## Similarly for residuals:
+## Bootstrap residuals
+k10bootstrap=Clarity_Bootstrap(Clarity_Extract(scan,10),
+                               D=datarawD)
+## Extract observed residuals
+k10residuals=Clarity_Extract(predmix,k=10)
+## Compute Pvals
+residualpvals=Clarity_BScompare(k10bootstrap,k10residuals,
+                        population="bestcol")
+residualsignif=residualpvals<0.01
+
+}
 }
 \seealso{
-\code{\link{Clarity_Bootsrap}}
+\code{\link{Clarity_Bootstrap}} for making bootstraps. For plotting, \code{\link{plot.Clarity}} or \code{\link{plot.ClarityScan}} call this function for you.  \code{\link{Clarity_Persistence}} for extracting persistence or  \code{\link{Clarity_Extract}} to extract residuals.
 }

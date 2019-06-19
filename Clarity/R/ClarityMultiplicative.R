@@ -25,8 +25,7 @@
 #' }
 #' @seealso \code{\link{Clarity_Scan}} is the recommended interface for performing  inference on a representation of a single similarity matrix with Clarity.
 #' @export
-#' @examples
-
+#' 
 c_initKmeans=function(Y,K,a=0.9,sigma=0.0001,sigmaY=1e-5,nstart=1000,iter.max=50){
     if(dim(Y)[1]==K){
         A=diag(K)
@@ -89,7 +88,7 @@ c_initKmeans=function(Y,K,a=0.9,sigma=0.0001,sigmaY=1e-5,nstart=1000,iter.max=50
 #' @keywords mixture
 #' @return A non-negative matrix of dimension N by K
 #' @export
-#' @examples
+#' 
 c_updateA<-function(A,X,Y,fixed=NULL,norm=TRUE) {
     ## This is probably the most efficient way to implement this, based on the choices of ordering available
     tAA=(t(A) %*% A) 
@@ -125,7 +124,7 @@ c_updateA<-function(A,X,Y,fixed=NULL,norm=TRUE) {
 #' @return A non-negative matrix of dimension K by K
 #' @seealso \code{\link{c_updateA}} for updates to A
 #' @export
-#' @examples
+#' 
 c_updateX<-function(A,X,Y){
     Xsol=try(c_updateX_solve(A,Y),silent=TRUE)
     if(class(Xsol)=="try-error"){
@@ -163,7 +162,8 @@ c_updateX<-function(A,X,Y){
 #' @param sigma (defailt 0.0001) a parameter for \code{\link{c_initKmeans}}
 #' @param sigmaY (defailt 1e-5) a parameter for \code{\link{c_initKmeans}}
 #' @param ensurepositive (default TRUE) Whether we restrict to non-negative Y. Note that the algorithm can work with some negative Y as long as it is postitive semi-definite, but this can still lead to convergence problems.
-#' @param fixed (efault NULL) which columns to keep structurally fixed. Not yet used.
+#' @param fixed (default NULL) which columns to keep structurally fixed. Not yet used.
+#' @param ... Additional arguments (which will be ignored)
 #' 
 #' @keywords mixture
 #' @return A list of class "Clarity" containing the following:
@@ -188,7 +188,7 @@ c_updateX<-function(A,X,Y){
 #' 
 #' @seealso \code{\link{Clarity_Scan}} is the recommended interface for performing  inference on a representation of a single similarity matrix with Clarity.
 #' @export
-#' @examples
+#' 
 c_multiplicative_fixedK<-function(Y,
                         K=NULL,
                   tmax=1e4, # Maximum number of iterations
@@ -281,7 +281,8 @@ c_multiplicative_fixedK<-function(Y,
              objective=utils::tail(objectivelist,1),
                 objectivedist=objectivelist,
                 matrixdistmin=matrixdistmin,
-             objectivedistmin=objectivedistmin)
+             objectivedistmin=objectivedistmin,
+             method="Multiplicative")
     class(ret)="Clarity"
     return(ret)
 }
@@ -307,7 +308,7 @@ c_multiplicative_fixedK<-function(Y,
 #' 
 #' @seealso \code{\link{Clarity_Scan}} is the recommended interface for performing  inference on a representation of a single similarity matrix with Clarity.
 #' @export
-#' @examples
+#' 
 c_ScanOnly=function(Y,kmax=20,tmax=1e4,
                      matrixdistmin=1e-8,objectivedistmin=1e-3,
                     printskip=1000,verbose=TRUE,...){
@@ -324,7 +325,8 @@ c_ScanOnly=function(Y,kmax=20,tmax=1e4,
              objectives=sapply(clist,function(x)x$objective),
              klist=klist,
              Y=Y,
-             kmax=kmax)
+             kmax=kmax,
+             method="Multiplicative")
     class(ret)<-"ClarityScan"
     return(ret)
 }
@@ -418,7 +420,7 @@ c_DecreaseK<-function(Y,A,X){
 #' 
 #' @seealso \code{\link{Clarity_Scan}} is the recommended interface for performing  inference on a representation of a single similarity matrix with Clarity.
 #' @export
-#' @examples
+#' 
 c_ForwardStep<-function(clist,verbose=TRUE,tmax=10000,matrixdistmin=NULL,objectivedistmin=NULL,alpha=0.9,dirichletbeta=1,...){
     ## Update states at K+1 using the state at K, and choose the best one to retain
     ## Report the new updated list
@@ -480,7 +482,7 @@ c_ForwardStep<-function(clist,verbose=TRUE,tmax=10000,matrixdistmin=NULL,objecti
 #' 
 #' @seealso \code{\link{Clarity_Scan}} is the recommended interface for performing inference on a representation of a single similarity matrix with Clarity.
 #' @export
-#' @examples
+#' 
 c_BackwardStep<-function(clist,verbose=TRUE,tmax=10000,matrixdistmin=NULL,objectivedistmin=NULL,...){
     ## Update states at K-1 using the state at K, and choose the best one to retain
     ## Report the new updated list
@@ -543,7 +545,7 @@ c_BackwardStep<-function(clist,verbose=TRUE,tmax=10000,matrixdistmin=NULL,object
 #' 
 #' @seealso \code{\link{Clarity_Scan}} is the recommended interface for performing  inference on a representation of a single similarity matrix with Clarity.
 #' @export
-#' @examples
+#' 
 c_ForwardBackward<-function(clist,niter=10,thresh=-1,tmax=10000,verbose=TRUE,matrixdistmin=1e-8,objectivedistmin=0.001,...){
     ## Runs backwards and forwards through the results using neighbouring runs to improve one-another. Does this niter times in both directions. Returns the optimised clist
     if(class(clist)!="ClarityScan") stop("clist must be of class ClarityScan as returned by Clarity_Scan")
@@ -606,12 +608,16 @@ c_ForwardBackward<-function(clist,niter=10,thresh=-1,tmax=10000,verbose=TRUE,mat
 #' \item kmax The maximum K requested
 #' }
 #' 
-#' @seealso \code{\link{Clarity_fixedK}} is used at each K, and documents the important parameters. \code{\link{c_ScanOnly}} is used to generate the initial ClarityScan object independently for each K.
+#' @seealso \code{\link{Clarity_Scan}} explains what can be done with this and is the recommended interface (see example). \code{\link{Clarity_fixedK}} is used at each K, and documents the important parameters. \code{\link{c_ScanOnly}} is used to generate the initial ClarityScan object independently for each K. 
 #' @export
 #' @examples
-#' \donttest{
-#' scanraw=Clarity_Scan(dataraw) # Generate an initial run
-#' scanraw=Clarity_Scan(dataraw,clist=scanraw) # Run it for longer
+#' \dontrun{
+#' ## This can be quite slow (a few minutes)
+#' 
+#' # Generate an initial run
+#' scanraw=Clarity_Scan(dataraw,method="Multiplicative") 
+#' # Run it for longer:
+#' scanraw=Clarity_Scan(dataraw,clist=scanraw)
 #' }
 Clarity_Multiplicative_Scan<-function(Y,
                       kmax=20,

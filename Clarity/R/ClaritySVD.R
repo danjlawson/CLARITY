@@ -1,4 +1,4 @@
-###############################
+##############################
 #' @title Fit a simplex around a ball
 #'
 #' @description
@@ -121,7 +121,8 @@ c_SVD_fixedK <- function(Ysvd,Y,k,verbose=TRUE){
     Yresid=Y-Yhat
     objective=sum((Y - Yhat)^2)
     ret=list(A=A,Z=Z,ZS=ZS,X=X,prediction=Yhat,
-             Y=Y,k=k,Yresid=Yresid,objective=objective)
+             Y=Y,k=k,Yresid=Yresid,objective=objective,
+             method="SVDmix")
     class(ret)="Clarity"
     return(ret)
 }
@@ -159,6 +160,7 @@ c_SVD_Scan <- function(Y,kmax=NULL,Ysvd=NULL,verbose=TRUE){
     ret$Y=Y
     ret$kmax=kmax
     ret$Ysvd=Ysvd
+    ret$method="SVDmix"
     class(ret)="ClarityScan"
     return(ret)
 }
@@ -248,6 +250,7 @@ c_SVD_ResidualExtend <- function(clist,kmax=10,verbose=TRUE) {
         c_SVD_ResidualExtendFixedK(clist,ret$Rsvd,ret$R,kextra,verbose)
     })
     ret$objectives=sapply(ret$scan,function(x)x$objective)
+    ret$methpd=clist$method
     class(ret)="ClarityScanExtend"
     ret
 }

@@ -39,16 +39,10 @@ An object of class "ClarityScanExtend", which is a list containing the same item
 \description{
 Extend a ClarityScan that has been fitted to new data, to additionally fit the residuals of that data.
 First call \code{\link{Clarity_Predict}} to fit the object to the new data, then call this to fit the residuals.
-XXXX MUST PROVIDE SOME ANALYSIS
+
+This function is not yet ready for production.
 
 Currently only \code{\link{c_SVD_ResidualExtend}} is available as a method.
-}
-\examples{
-\donttest{
-scansvd=Clarity_Scan(dataraw) # Generate an initial run
-predsvd=Clarity_Predict(datamix,scansvd) # Predict it into the mixed up data
-extendsvd=Clarity_Extend(datamix,scansvd) # Extend the model to additionally fit the 
-}
 }
 \seealso{
 \code{\link{Clarity_Scan}} to generate an estimate for clist to be used here, and \code{\link{Clarity_Predict}} to make an initial prediction of the new data.

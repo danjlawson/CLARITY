@@ -7,6 +7,8 @@
 #' @param x An N by K matrix of N subjects observed at K features
 #' 
 #' @return An N by N matrix of the distances
+#' @seealso \code{\link{Clarity_Bootstrap}}, which takes an argument distfn which can be given this or another function that generates a similarity from feature data.
+#' 
 #' @export
 #' 
 c_dist=function(x){
@@ -61,10 +63,10 @@ c_listSymmetricDivergence=function(y1scan,y2scan,y12pred,y21pred){
 #' @title Extract objects from a Clarity or ClarityScan object
 #'
 #' @description
-#' Extract objects such as the Yresid residuals from a ClarityScan object. This is useful for constructing Persistences or similar. Also provides a standardized interface to extract the absolute value of residuals.
+#' Extract objects such as Clarity objects or residuals from a ClarityScan object. This is useful for constructing Persistences or similar. Also provides a standardized interface to extract the absolute value of residuals.
 #' 
 #' @param cscan A Clarity or ClarityScan object
-#' @param what (default="Yresid") the object to extract
+#' @param what (default="Yresid") the object to extract. If a number and cscan is a ClarityScan object, returns the associated Clarity object. If it is the string "Rsq" return the square residuals.
 #' @param summary (default=abs) any summary to apply to the result. abs is useful to create residuals that rank naturally.
 #' @param diag (default=0) What to do with the diagonal. If NULL, nothing is done; otherwise the diagonal is set to this value. The diagonal often has inflated residuals and hence should normally be set to 0 for comparison.
 #' @param k (default=NULL) if specified and cscan is a ClarityScan object, only the value for the specified k is returned, allowing residuals for a single k to be extracted.
@@ -72,16 +74,33 @@ c_listSymmetricDivergence=function(y1scan,y2scan,y12pred,y21pred){
 #' 
 #' @return A list containing what for each k in the ClarityScan
 #' @seealso \code{\link{Clarity_Persistence}} to which you can pass
+#' @examples
+#' \donttest{
+#' scan=Clarity_Scan(dataraw)
+#' e1=Clarity_Extract(scan) # Get a list containing the absolute residual matrices for each k
+#' e2=Clarity_Extract(scan,what=5) # get the 5th Clarity object
+#' e3=Clarity_Extract(scan,summary=I,k=5) # get the 5th Residual matrix
+#' e4=Clarity_Extract(scan,summary=I,k=5) # get the 5th Residual matrix
+#' e5=Clarity_Extract(scan,"Rsq",k=5) # get the 5th square residual matrix
+#' e6=Clarity_Extract(scan,"Rsq") # Get a list containing the R squared matrix for each k
+#' }
 #' @export
-#'
+#' 
 Clarity_Extract=function(cscan,what="Yresid",summary=abs,diag=0,k=NULL){
     if(class(cscan)=="Clarity") {
-        ret=summary(cscan[[what]])
+        if(what=="Rsq") {
+            ret=cscan[["Yresid"]]^2
+        }else ret=summary(cscan[[what]])
     }else if(class(cscan)=="ClarityScan"){
+        if(class(what)=="numeric") return(cscan$scan[[what]])
         if(!is.null(k)) {
-            ret=summary(cscan$scan[[k]][[what]])
+            if(what=="Rsq") {
+                ret=cscan$scan[[k]][["Yresid"]]^2
+            }else{
+                ret=summary(cscan$scan[[k]][[what]])
+            }
         }else{
-            ret = lapply(cscan$scan,function(x) summary(x[[what]]))
+            ret=lapply(cscan$scan,function(x) Clarity_Extract(x,what,summary,diag,k))
         }
     }else stop(paste("Invalid class",class(cscan),"for cscan in Clarity_Extract"))
     if((class(ret)=="matrix") && (!is.null(diag))) diag(ret)=diag
@@ -95,19 +114,30 @@ Clarity_Extract=function(cscan,what="Yresid",summary=abs,diag=0,k=NULL){
 #' @description
 #'
 #' Perform an operation on a list of matrices in order to compute a Persistence Structure. By default, it computes
-#' $$P_{ik} = \sum_{j=1^}N (Y_{ij} - \hat{Y}^k_{ij})^2$$
-#' in the notation of Lawson et al 2019 CLARITY paper, where $Y$ is the provided data matrix and $\hat{Y}^k$ is the predicted matrix at complexity $k$.
+#' \eqn{P_{ik} = \sum_{j=1^}N (Y_{ij} - \hat{Y}^k_{ij})^2}
+#' in the notation of Lawson et al 2019 CLARITY paper, where Y is the provided data matrix and \eqn{\hat{Y}^k} is the predicted matrix at complexity k.
 #' 
 #' @param clist A ClarityScan object, or a list of matrices
 #' @param f (Default="RowSumsSquared" which generates Persistences) Either a character string matching "Frobenius" or "RowSumsSquared", or a function to compute for each matrix, which should return a vector when operating on a matrix. "Frobenius" is the Frobenius norm of the matrix (sum(x^2)), which results in a vector being returned, whereas "RowSumsSquared" evaluates as rowSums(x^2) and means a persistence matrix is returned.
 #' @param what (Default="Yresid") What to extract from the ClarityScan object. "Y" and "prediction" can be extracted.
+#' @param diag (Default=0) Special values to give the diagonal. NULL leaves them unchanged, 0 removes from the persisetence measure. See \code{\link{Clarity_Extract}}.
 #' @param summary (Default=abs) Summary to be applied to the extracted matrices.
 #' 
-#' @return $f$ evaluated at each $k$, which results in an $N$ by $k$ matrix by default (where $N$ is the number of data items and $k$ is the maximum complexity)
-#' @export
+#' @return f evaluated at each k, which results in an N by k matrix by default (where N is the number of data items and k is the maximum complexity)
+#' @examples
+#' \donttest{
+#' scan=Clarity_Scan(dataraw) ## Core Clarity
+#' predmix=Clarity_Predict(datamix,scan)
+#' p=Clarity_Persistence(scan) # extract persistence
+#' p2=Clarity_Persistence(predmix) # extract persistence from ClarityScan
+#' par(mfrow=c(1,2))
+#' Clarity_Chart(p,main="Learned persistence") # p is a matrix 
+#' Clarity_Chart(p2,main="Different topology persistence") # p2 is a matrix
+#' }
 #' @seealso \code{\link{Clarity_Extract}}
-Clarity_Persistence=function(clist,f="RowSumsSquared",what="Yresid",summary=abs){
-    if(class(clist)=="ClarityScan") return(Clarity_Persistence(Clarity_Extract(clist,what,summary)))
+#' @export
+Clarity_Persistence=function(clist,f="RowSumsSquared",what="Yresid",summary=abs,diag=0){
+    if(class(clist)=="ClarityScan") return(Clarity_Persistence(Clarity_Extract(clist,what,summary,diag=diag)))
     if(class(f)=="character") {
         if(f=="Frobenius") {
             f=function(x)sum(x^2)
@@ -126,11 +156,14 @@ Clarity_Persistence=function(clist,f="RowSumsSquared",what="Yresid",summary=abs)
 #'
 #' @description
 #'
-#' Takes a Clarity or ClarityScan object, and some feature data, and bootstrap resamples the features to result in a similarity matrix. This is predicted by the model and summarised appropriately for comparison to data. Uses \code{\link{Clarity_Persistence}} for Persistences and \code{\link{Clarity_Predict}} directly for Residuals.
+#' Takes a Clarity or ClarityScan object and create an ensemble of results for it. Either provide a list of replicated similarity matrices, or some feature data from which bootstrap resamples can be taken from the features to result in a similarity matrix.
 #'
-#' @param D an N by L matrix containing N data items and L features. The features are resampled with replacement.
+#' Each replicated similarity matrix is predicted by the model and summarised appropriately for comparison to data. Uses \code{\link{Clarity_Persistence}} for Persistences and \code{\link{Clarity_Predict}} directly for Residuals.
+#'
 #' @param clearned either a ClarityScan or Clarity object. If a Clarity object, then residuals will be bootstrapped. If a ClarityScan object then Persistence will be bootstrapped, unless a specific k is given in which case Residuals are again calculated.
-#' @param nbs Number of bootstraps (default: 100)
+#' @param D (default=NULL) An N by L matrix containing N data items and L features. If provided, bootstrapped similarity matrices Ylist are generated by resampling features with replacement.
+#' @param Ylist (default=NULL) A list of N by N similarity matrices generated exactly as the original data were generated.
+#' @param nbs (default=100) Number of bootstraps to use when D is provided.
 #' @param k If specified and clearned is a ClarityScan object, residuals for this k are bootstrapped. (default: NULL, meaning use Persistences)
 #' @param distfn Distance function to apply to the bootstrapped data, which should return a similarity or dissimilarity matrix. Default: c_dist, which is as,matrix(dist(x)).
 #' @param summary (default=abs) Summarisation of the bootstrapped value when extracting Residuals. Default: abs, which allows residuals to be easily compared. Use summary=I to return the raw data. See \code{\link{Clarity_Extract}}.
@@ -139,17 +172,59 @@ Clarity_Persistence=function(clist,f="RowSumsSquared",what="Yresid",summary=abs)
 #' @param verbose Whether to print to screen each iteration. Default: FALSE
 #' @param ... Additional parameters to \code{\link{Clarity_Persistence}} (not required for normal usage)
 #' @return A list of length nbs, each containing a matrix
+#' @seealso \code{\link{Clarity_Scan}} to run Clarity, \code{\link{Clarity_Extract}} to extract residuals and persistences, \code{\link{plot.ClarityScan}} and \code{\link{plot.Clarity}} for plotting.
+#' @examples
+#' \donttest{
+#' scan=Clarity_Scan(dataraw) ## Core Clarity
+#' ## Simple feature-based bootstrap for persistences
+#' scanbootstrap=Clarity_Bootstrap(scan,D=datarawD)
+#'
+#' ## Construct a list of externally produced resamples
+#' Dreplist=lapply(1:100,function(rep){
+#'     datarawD[,sample(1:dim(datarawD)[2],
+#'     dim(datarawD)[2], replace = TRUE)]
+#' })
+#' Yreplist=lapply(Dreplist,c_dist)
+#' ## NB Yreplist can have come from a complex resampling scheme
+#'
+#' ## Bootstrap based on arbitrary resampling scheme
+#' scanbootstrap=Clarity_Bootstrap(scan,Ylist=Yreplist)
+#'
+#' ## Plot bootstrapped persistence chart
+#' predmix=Clarity_Predict(datamix,scan)
+#' predplot=plot(predmix,signif=scanbootstrap)
+#'
+#' ## Similarly for Residuals
+#' k10bootstrap=Clarity_Bootstrap(Clarity_Extract(scan,10),
+#'     D=datarawD)
+#' predplot=plot(Clarity_Extract(predmix,10),
+#'     signif=k10bootstrap)
+#' }
 #' @export
-Clarity_Bootstrap<-function(D,clearned,nbs=100,k=NULL,distfn=c_dist,summary=abs,diag=0,seed=NULL,verbose=FALSE,...){
+Clarity_Bootstrap<-function(clearned,D=NULL,Ylist=NULL,nbs=100,k=NULL,distfn=c_dist,summary=abs,diag=0,seed=NULL,verbose=FALSE,...){
     ## If provided with k, bootstraps the residuals. Otherwise bootstrap the persistence.
+    if(all(is.null(D)) && all(is.null(Ylist))) stop("Must provide exactly one of D or Ylist")
+    if(!all(is.null(D))){
+        ## We want to use D to bootstrap the data
+        if(!all(is.null(Ylist))) stop("Must provide exactly one of D or Ylist")
+    }else{
+        ## We want to use Ylist as provided bootstraps of the data
+        nbs=length(Ylist)
+    }
     if(is.null(seed))seed=1:nbs
     if(length(seed)==1) set.seed(seed)
     bspers=lapply(1:nbs,function(rep){
         if(verbose)print(paste("Iteration",rep,"of",nbs))
-        if(length(seed)==nbs) set.seed(rep)
-        xbs=sample(1:dim(D)[2],dim(D)[2],replace=TRUE)
-        Dbs=D[,xbs,drop=FALSE]
-        Ybs=distfn(Dbs)
+        if(!all(is.null(Ylist))){
+            ## Use the provided Ylist
+            Ybs=Ylist[[rep]]
+        }else{
+            ## Use the provided D
+            if(length(seed)==nbs) set.seed(seed[rep])
+            xbs=sample(1:dim(D)[2],dim(D)[2],replace=TRUE)
+            Dbs=D[,xbs,drop=FALSE]
+            Ybs=distfn(Dbs)
+        }
         if(is.null(k) && class(clearned)=="ClarityScan"){
             cbs=Clarity_Predict(Ybs,clearned)
             return(Clarity_Persistence(cbs,...))
@@ -159,7 +234,9 @@ Clarity_Bootstrap<-function(D,clearned,nbs=100,k=NULL,distfn=c_dist,summary=abs,
             return(Clarity_Extract(cbs,summary=summary,diag=diag))
         }
     })
-    bspers
+    if(class(clearned)=="Clarity") class(bspers)="ClarityBootstrap"
+    if(class(clearned)=="ClarityScan") class(bspers)="ClarityScanBootstrap"
+    return(bspers)
 }
 ###############################
 #' @title Compare Observed to Bootstrap values 
@@ -170,16 +247,53 @@ Clarity_Bootstrap<-function(D,clearned,nbs=100,k=NULL,distfn=c_dist,summary=abs,
 #'
 #' Note that when population="bestrow" a conservative test is applied in which the best B bootstrap values from the entire column is used as the null distribution. This is appropriate for testing Persistences extracted via \code{\link{Clarity_Persistence}}.
 #'
+#' Also note that for normal use you might just want to use \code{\link{plot.Clarity}} or \code{\link{plot.ClarityScan}}, both of which use this function for you.
+#'
 #' @param testbs A list of bootstrapped matrices as returned from \code{\link{Clarity_Bootstrap}}
-#' @param obs A matrix of observed values
+#' @param obs Either a Clarity object (for comparing residuals), A ClarityScan object (for comparing persistences) or a matrix of observed values (absolute residuals or persistences, respectively)
 #' @param population (default="element") whether the population being compared to is the "element" X[i,j], or "bestcol": the B best values in the "column" X[,i]
 #' @param comparison (default=function(x,o){sum(o>x)/(length(x)+1)}) a function to score the observed value relative to the bootstraped values.
+#' @param ... Additional parameters to \code{\link{Clarity_Persistence}}, if provided with a ClarityScan object.
+#' 
 #' @return A matrix of the same shape as obs, containing the result of comparison applied to each element
+#' @seealso \code{\link{Clarity_Bootstrap}} for making bootstraps. For plotting, \code{\link{plot.Clarity}} or \code{\link{plot.ClarityScan}} call this function for you.  \code{\link{Clarity_Persistence}} for extracting persistence or  \code{\link{Clarity_Extract}} to extract residuals.
+#' @examples
+#' \donttest{
+#' scan=Clarity_Scan(dataraw) ## Core Clarity
+#' predmix=Clarity_Predict(datamix,scan) ## Core prediction
+#' 
+#' ## Bootstrap persistences:
+#' scanbootstrap=Clarity_Bootstrap(scan,D=datarawD)
+#' ## Extract observed persistences
+#' P=Clarity_Persistence(predmix)
+#' ## Compute pvalues
+#' pvals=Clarity_BScompare(scanbootstrap,P)
+#' ## pvals is a matrix of dimension N by K
+#' signif=pvals<0.01
+#' ## signif is a logical matrix of dimension N by K
+#' 
+#' ## Similarly for residuals:
+#' ## Bootstrap residuals
+#' k10bootstrap=Clarity_Bootstrap(Clarity_Extract(scan,10),
+#'                                D=datarawD)
+#' ## Extract observed residuals
+#' k10residuals=Clarity_Extract(predmix,k=10)
+#' ## Compute Pvals
+#' residualpvals=Clarity_BScompare(k10bootstrap,k10residuals,
+#'                         population="bestcol")
+#' residualsignif=residualpvals<0.01
+#'
+#' }
 #' @export
-#' @seealso \code{\link{Clarity_Bootsrap}}
-
-Clarity_BScompare=function(testbs,obs,population="element",
-                           comparison=function(x,o){sum(c(x,o)>=o)/(length(x)+1)} ) {
+Clarity_BScompare=function(testbs,obs,
+                           population="element",
+                           comparison=function(x,o){sum(c(x,o)>=o)/(length(x)+1)},
+                           ... ) {
+    if(class(obs)=="Clarity"){
+        obs=Clarity_Extract(obs,diag=0)
+    }else if(class(obs)=="ClarityScan"){
+        obs=Clarity_Persistence(obs,...)
+    }
     if(population=="element"){
         ret=t(sapply(1:dim(obs)[1],function(i){
             sapply(1:dim(obs)[2],function(j){
