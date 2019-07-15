@@ -42,7 +42,7 @@
 #' scan=Clarity_Scan(dataraw)
 #' predmix=Clarity_Predict(datamix,scan)
 #' scanpred=Clarity_Predict(datamix,scan)
-#' scanbootstrap=Clarity_Bootstrap(scan,D=datarawD)
+#' scanbootstrap=Clarity_Bootstrap(scan,target=datamix,D=datarawD)
 #'
 #' ## The recommended way to plot:
 #' plot(scanpred,signif=scanbootstrap)
@@ -199,7 +199,8 @@ Clarity_Chart<-function(x,
 #' predmix=Clarity_Predict(datamix,scan) ## Core prediction
 #' ## Bootstrap residuals
 #' k10bootstrap=Clarity_Bootstrap(Clarity_Extract(scan,10),
-#'                                 D=datarawD)
+#'                                target=datamix, 
+#'                                D=datarawD)
 #' ## Plot Residuals
 #' plot(Clarity_Extract(predmix,10),
 #'               signif=k10bootstrap)
@@ -306,7 +307,9 @@ plot.Clarity=function(x,
 #' \donttest{
 #' scan=Clarity_Scan(dataraw) ## Core Clarity
 #' predmix=Clarity_Predict(datamix,scan) ## Core prediction
-#' scanbootstrap=Clarity_Bootstrap(scan,D=datarawD)
+#' scanbootstrap=Clarity_Bootstrap(scan,
+#'                                 target=datamix,
+#'                                 D=datarawD)
 #' 
 #' ## Plotting:
 #' plot(predmix,signif=scanbootstrap)
@@ -412,7 +415,7 @@ plot.ClarityScan=function(x,
 #' \donttest{
 #' scan=Clarity_Scan(dataraw) ## Core Clarity
 #' predmix=Clarity_Predict(datamix,scan) ## Core prediction
-#' scanbootstrap=Clarity_Bootstrap(scan,D=datarawD)
+#' scanbootstrap=Clarity_Bootstrap(scan,target=datamix,D=datarawD)
 #' 
 #' ## Plotting: generate a plotting object
 #' predplot=plot(predmix,signif=scanbootstrap,plot=FALSE)
@@ -473,7 +476,7 @@ plot.ClarityPlot=function(x,order=NULL,...){
 #' predmix=Clarity_Predict(datamix,scan) ## Core prediction
 #'
 #' ## Plot bootstrapped persistence chart
-#' scanbootstrap=Clarity_Bootstrap(scan,D=datarawD)
+#' scanbootstrap=Clarity_Bootstrap(scan,target=datamix,D=datarawD)
 #' predplot=plot(predmix,signif=scanbootstrap)
 #' ## Add the legend outside of the regular image space
 #' c_legend(0,22,size=c(10,0.5))

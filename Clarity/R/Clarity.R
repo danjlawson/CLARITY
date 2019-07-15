@@ -147,7 +147,7 @@ c_listscore=function(clist){
 #' 
 #' @param Y An N by N non-negative matrix of similarities
 #' @param k an integer giving the dimension of the fit to be used
-#' @param method (Default: "SVD"; fuzzy matched to either "SVD" or "Multiplicative"
+#' @param method (Default: "SVDX") Method to use. Fuzzy matched to either "SVD","SVDX","SVDmix" or "Multiplicative"
 #' @param verbose (Default TRUE) whether to print progress information.
 #' @param ... futher parameters to be passed to \code{\link{c_multiplicative_fixedK}} or \code{\link{c_SVD_fixedK}}
 #' 
@@ -174,18 +174,23 @@ c_listscore=function(clist){
 #' scansvd=Clarity_fixedK(dataraw,3) # Use the SVD method
 #' scanmult=Clarity_fixedK(dataraw,3,method="M") # Use the Multiplicative method
 #' }
-Clarity_fixedK <- function(Y,k,method="SVD",verbose=TRUE,...){
+Clarity_fixedK <- function(Y,k,method="SVDX",verbose=TRUE,...){
     eargs=as.list(match.call())
     method=c_argmatch(method,c("SVD","Multiplicative"))
-#    return(eargs)
-    if(method=="SVD") {
-        if("Ysvd"%in%names(eargs)) {
-            Ysvd=eval(eargs[["Ysvd"]])
-        }else {
+    if("Ysvd"%in%names(eargs)) {
+        Ysvd=eval(eargs[["Ysvd"]])
+    }else {
+        if(method!="Multiplicative"){
             if(verbose)print("Computing SVD of Y. You can skip this by providing it as Ysvd")
             Ysvd=svd(Y-rowMeans(Y))
-        }
-        return(c_SVD_fixedK(Ysvd,Y,k,verbose))
+        }else Ysvd=NULL
+    }
+    if(method=="SVDmix"){
+        return(c_SVD_fixedK(Ysvd,Y,k,verbose,...))
+    }else if(method=="SVD"){
+        return(c_simpleSVD_fixedK(Ysvd,Y,k,verbose=verbose,Xtype="Sigma"))
+    }else if(method=="SVDX"){
+        return(c_simpleSVD_fixedK(Ysvd,Y,k,verbose=verbose,Xtype="X"))
     }else if(method=="Multiplicative"){
         return(c_multiplicative_fixedK(Y,k,verbose=verbose,...))
     }else{
@@ -333,7 +338,7 @@ Clarity_Extend <- function(clist,kmax=10,
 #' ## Onward analysis:
 #' predmix=Clarity_Predict(datamix,scan) ## Core prediction
 #' ## Bootstrap based on arbitrary resampling scheme
-#' scanbootstrap=Clarity_Bootstrap(scan,D=dataraw)
+#' scanbootstrap=Clarity_Bootstrap(scan,target=datamix,D=dataraw)
 #' ## Core persistence plot
 #' plot(predmix,signif=scanbootstrap)
 #' }

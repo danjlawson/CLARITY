@@ -35,7 +35,7 @@ scan=Clarity_Scan(dataraw) ## Core Clarity
 predmix=Clarity_Predict(datamix,scan) ## Core prediction
 
 ## Bootstrap persistences:
-scanbootstrap=Clarity_Bootstrap(scan,D=datarawD)
+scanbootstrap=Clarity_Bootstrap(scan,target=datamix,D=datarawD)
 ## Extract observed persistences
 P=Clarity_Persistence(predmix)
 ## Compute pvalues
@@ -47,6 +47,7 @@ signif=pvals<0.01
 ## Similarly for residuals:
 ## Bootstrap residuals
 k10bootstrap=Clarity_Bootstrap(Clarity_Extract(scan,10),
+                               target=datamix,
                                D=datarawD)
 ## Extract observed residuals
 k10residuals=Clarity_Extract(predmix,k=10)

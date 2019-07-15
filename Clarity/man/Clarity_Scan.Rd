@@ -48,7 +48,7 @@ scan=Clarity_Scan(dataraw) # SVD method model fit
 ## Onward analysis:
 predmix=Clarity_Predict(datamix,scan) ## Core prediction
 ## Bootstrap based on arbitrary resampling scheme
-scanbootstrap=Clarity_Bootstrap(scan,D=dataraw)
+scanbootstrap=Clarity_Bootstrap(scan,target=datamix,D=dataraw)
 ## Core persistence plot
 plot(predmix,signif=scanbootstrap)
 }

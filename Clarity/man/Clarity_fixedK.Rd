@@ -4,14 +4,14 @@
 \alias{Clarity_fixedK}
 \title{Run The full Clarity algorithm for a fixed number of mixtures}
 \usage{
-Clarity_fixedK(Y, k, method = "SVD", verbose = TRUE, ...)
+Clarity_fixedK(Y, k, method = "SVDX", verbose = TRUE, ...)
 }
 \arguments{
 \item{Y}{An N by N non-negative matrix of similarities}
 
 \item{k}{an integer giving the dimension of the fit to be used}
 
-\item{method}{(Default: "SVD"; fuzzy matched to either "SVD" or "Multiplicative"}
+\item{method}{(Default: "SVDX") Method to use. Fuzzy matched to either "SVD","SVDX","SVDmix" or "Multiplicative"}
 
 \item{verbose}{(Default TRUE) whether to print progress information.}
 
