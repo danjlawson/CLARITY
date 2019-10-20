@@ -45,11 +45,17 @@ alternatesim<-mixCoalescent(mysim)
 dataraw=mysim$Y
 datarep=similarsim$Y
 datamix=alternatesim$Y
+datarawD=mysim$D
+datarepD=similarsim$D
+datamixD=alternatesim$D
 
 system("mkdir -p Clarity/data")
 save(dataraw,file="Clarity/data/dataraw.RData")
 save(datarep,file="Clarity/data/datarep.RData")
 save(datamix,file="Clarity/data/datamix.RData")
+save(datarawD,file="Clarity/data/datarawD.RData")
+save(datarepD,file="Clarity/data/datarepD.RData")
+save(datamixD,file="Clarity/data/datamixD.RData")
 ##save(mysim,similarsim,alternatesim,file="Clarity_AdditionalData.RData")
 
 

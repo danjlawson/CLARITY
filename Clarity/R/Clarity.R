@@ -176,13 +176,13 @@ c_listscore=function(clist){
 #' }
 Clarity_fixedK <- function(Y,k,method="SVDX",verbose=TRUE,...){
     eargs=as.list(match.call())
-    method=c_argmatch(method,c("SVD","Multiplicative"))
+    method=c_argmatch(method,c("SVD","SVDX","SVDmix","Multiplicative"))
     if("Ysvd"%in%names(eargs)) {
         Ysvd=eval(eargs[["Ysvd"]])
     }else {
         if(method!="Multiplicative"){
             if(verbose)print("Computing SVD of Y. You can skip this by providing it as Ysvd")
-            Ysvd=svd(Y-rowMeans(Y))
+            Ysvd=c_svd(Y)
         }else Ysvd=NULL
     }
     if(method=="SVDmix"){
@@ -207,7 +207,7 @@ Clarity_fixedK <- function(Y,k,method="SVDX",verbose=TRUE,...){
 #' 
 #' @param Ynew The data to be predicted
 #' @param clist The learned Clarity object, either of class "Clarity" or of class "ClarityScan"
-#' @param Ysvd Default NULL. SVD of Y, which is needed for the method="SVD". You can provide it or it will be computed for you when using this method. NB: It should be the SVD of Y-rowMeans(Y) to remove the mean effect!
+#' @param Ysvd Default NULL. SVD of Y, which is needed for the method="SVD". You can provide it or it will be computed for you when using this method. NB: It should be the SVD of Y-rowMeans(Y) to remove the mean effect, as computed by \code{\link{c_svd}}.
 #' 
 #' @keywords mixture
 #' @return An object of the same class as clist provided, with updated Y, X and derived features.
@@ -224,7 +224,7 @@ Clarity_fixedK <- function(Y,k,method="SVDX",verbose=TRUE,...){
 #' }
 Clarity_Predict<-function(Ynew,clist,Ysvd=NULL) {
     if(class(clist)=="ClarityScan") {
-        if(is.null(Ysvd)) Ysvd=svd(Ynew-rowMeans(Ynew))
+        if(is.null(Ysvd)) Ysvd=c_svd(Ynew)
         ret=list()
         ret$scan=lapply(clist$scan,Clarity_Predict,Ynew=Ynew,Ysvd=Ysvd)
         ret$objectives=sapply(ret$scan,function(x)x$objective)
@@ -330,17 +330,19 @@ Clarity_Extend <- function(clist,kmax=10,
 #' \item ... Additional method-specific details (e.g. Ysvd for method="SVD")
 #' }
 
-#' @seealso  \code{\link{Clarity_fixedK}} for the details of what a "Clarity" object is. \code{\link{Clarity_Predict}} to make an initial prediction of the new data. \code{\link{plot.ClarityScan}} for plotting, \code{\link{Clarity_Bootstrap}} for quantifying uncertainty. \code{\link{Clarity_ObjectivePlot}} for comparing quality of fit as a function of \code{k}.
+#' @seealso  \code{\link{Clarity_fixedK}} for the details of what a "Clarity" object is. \code{\link{Clarity_Predict}} to make an initial prediction of the new data. \code{\link{plot.ClarityScan}} for plotting, \code{\link{Clarity_Compare}} for quantifying uncertainty. \code{\link{Clarity_ObjectivePlot}} for comparing quality of fit as a function of \code{k}.
 #' @export
 #' @examples
 #' \donttest{
 #' scan=Clarity_Scan(dataraw) # SVD method model fit
 #' ## Onward analysis:
 #' predmix=Clarity_Predict(datamix,scan) ## Core prediction
+#' ## Core persistence plot 
+#' plot(predmix)
 #' ## Bootstrap based on arbitrary resampling scheme
-#' scanbootstrap=Clarity_Bootstrap(scan,target=datamix,D=dataraw)
-#' ## Core persistence plot
-#' plot(predmix,signif=scanbootstrap)
+#' comparemix=Clarity_Compare(scan,target=datamix,D=dataraw)
+#' ## Core persistence plot including uncertainty
+#' plot(comparemix)
 #' }
 #' \dontrun{
 #' scanmult=Clarity_Scan(dataraw,method="M") # Multiplicative method model fit
@@ -367,4 +369,3 @@ Clarity_Scan <- function(Y, kmax =20,
         stop("Invalid method")
     }
 }
-

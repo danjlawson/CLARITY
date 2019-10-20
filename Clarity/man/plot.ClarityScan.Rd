@@ -6,13 +6,13 @@
 \usage{
 \method{plot}{ClarityScan}(x, signif = NULL, A = NULL, order = NULL,
   rotate = FALSE, plot = TRUE, type = "mean", kmax = NULL,
-  thresh = 0.01, diag = 0, f = "RowSumsSquared", what = "Yresid",
-  summary = abs, population = "bestcol", verbose = FALSE, ...)
+  thresh = 0.05, f = "RowSumsSquared", what = "Yresid",
+  verbose = FALSE, ...)
 }
 \arguments{
 \item{x}{A ClarityScan object.}
 
-\item{signif}{(default=NULL) either a ClarityScanBootstrap object as returned by \code{\link{Clarity_Bootstrap}}; or a matrix of p-values as returned by \code{\link{Clarity_BScompare}}; or a logical matrix of elements that are significant (the same dimensions as the similarities modelled in x). In all cases it is transformed to a logical matrix and passed to \code{\link{Clarity_Chart}}.}
+\item{signif}{(default=NULL) a matrix of p-values as returned by \code{\link{c_Scoresplit}}; or a logical matrix of elements that are significant (the same dimensions as the similarities modelled in x). In all cases it is transformed to a logical matrix and passed to \code{\link{Clarity_Chart}}.}
 
 \item{A}{(default=NULL) A mixture matrix by which to summarise the matrix using \code{\link{c_MergeSquare}}. This might e.g. represent a clustering of the elements in the similarities. It must be an N (number of subjects) by K' (number of desired clusters) matrix with named columns.}
 
@@ -26,17 +26,11 @@
 
 \item{kmax}{(default=NULL) if provided, persistences above kmax are not included in the plot.}
 
-\item{thresh}{(default=0.01) threshold for translating bootstrapped p-values into significant/not-significant calls for the matrix signif.}
-
-\item{diag}{(default=0) how to treat the diagonal of residuals when computing persistences, as used by \code{\link{Clarity_Persistence}}. Set to NULL to use the observed values, but the default 0 is recommended.}
+\item{thresh}{(default=0.05) threshold for translating resampled p-values into significant/not-significant calls for the matrix signif. NULL means use bonferoni correction (0.05/number of elements in matrix) which is often overly conservative.}
 
 \item{f}{(default="RowSumsSquared") how to summarise residuals into persistences, as used by \code{\link{Clarity_Persistence}}.}
 
 \item{what}{(default="Yresid") what to extract from each complexity when computing persistences, as used by \code{\link{Clarity_Persistence}}.}
-
-\item{summary}{(default=abs) how to summarise residuals into persistences, as used by \code{\link{Clarity_Persistence}}.}
-
-\item{population}{(default="bestcol") how to define the null model when computing p-values from bootstrapped data using \code{\link{Clarity_BScompare}}. The default is conservative by comparing each element to the most extreme values in its row, but "element" can be used to compare each element to only bootstrapped versions of itself.}
 
 \item{verbose}{(default=FALSE) whether to output information about what transformations are being done.}
 
@@ -49,7 +43,7 @@ A ClarityPlot object (invisibly) which is a list containing:
 \item A The provided A matrix
 \item P The extracted Persistence matrix, transformed and merged
 \item P0 The raw Persistence matrix as returned from \code{\link{Clarity_Persistence}}
-\item signif0 The raw logical significance matrix, either as provided or as returned from \code{\link{Clarity_BScompare}} if provided with a ClarityScanBootstrap object (same dimension as P0)
+\item signif0 The raw logical significance matrix, either as provided or as returned from \code{\link{c_pval}} if provided with a ClarityScanSignificance object (same dimension as P0)
 \item signif The significance matrix, transformed and merged (same dimension as P)
 \item rotate logical indicating whether we rotated the matrices
 }
@@ -57,20 +51,22 @@ A ClarityPlot object (invisibly) which is a list containing:
 \description{
 Plot a Persistence Chart, which is an image representing which subjects are poorly explained by a Clarity fit.
 
-This is the main plot fuction for persistences. It has several convenience manipulations to extract persistences and statistical significance associated with them via bootstrapping, as well as summarising them by clustering or mixtures.
+This is the main plot fuction for persistences. It has several convenience manipulations to extract persistences and statistical significance associated with them, as well as summarising them by clustering or mixtures.
 }
 \examples{
 \donttest{
 scan=Clarity_Scan(dataraw) ## Core Clarity
 predmix=Clarity_Predict(datamix,scan) ## Core prediction
-scanbootstrap=Clarity_Bootstrap(scan,
-                                target=datamix,
-                                D=datarawD)
+pvalmix=Clarity_Compare(scan,
+                                D=datarawD,
+                                Dnew=datamixD)
 
 ## Plotting:
-plot(predmix,signif=scanbootstrap)
+plot(pvalmix)
+## Plotting without p-values:
+plot(predmix)
 ## Merged clusters:
-plot(predmix,signif=scanbootstrap,A=datarawA)
+plot(pvalmix,A=datarawA)
 }
 }
 \seealso{

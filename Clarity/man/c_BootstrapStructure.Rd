@@ -2,37 +2,28 @@
 % Please edit documentation in R/ClarityBootstrap.R
 \name{c_BootstrapStructure}
 \alias{c_BootstrapStructure}
-\title{Compute Residuals or Persistences on bootstrapped data by scaling them to a target matrix}
+\title{Compute Residuals or Persistences on bootstrapped data by scaling them to the data from a learned clarity model}
 \usage{
-c_BootstrapStructure(clearned, Ybs, target, summary = abs, diag = 0,
-  transform = Clarity_Procrust, ...)
+c_BootstrapStructure(clearned, Ybs, transform = c_Procrust)
 }
 \arguments{
 \item{clearned}{either a ClarityScan or Clarity object. If a Clarity object, then residuals will be bootstrapped. If a ClarityScan object then Persistence will be bootstrapped, unless a specific k is given in which case Residuals are again calculated.}
 
 \item{Ybs}{The bootstrapped matrix for which the new model will be learned}
 
-\item{target}{The target matrix Y that will be modelled by this bootstrapping result.}
-
-\item{summary}{(default=abs) Summarisation of the bootstrapped value when extracting Residuals. Default: abs, which allows residuals to be easily compared. Use summary=I to return the raw data. See \code{\link{Clarity_Extract}}.}
-
-\item{diag}{(default=0) diagonal value to be applied when extracting Residuals. See \code{\link{Clarity_Extract}}.}
-
-\item{transform}{(default=Clarity_Procrust) A function to perform a transform of the data to match the target, taking two arguments, (Ybs,target). Default: Clarity_Procrust.}
-
-\item{...}{Additional parameters to \code{\link{Clarity_Persistence}} (not required for normal usage)}
+\item{transform}{(default=c_Procrust) A function to perform a transform of the data to match the target, taking two arguments, (Ybs,target). Default: c_Procrust.}
 }
 \value{
 A list of residuals if clearned is of class Clarity, or a list of persistences if clearned is of class ClarityScan.
 }
 \description{
-Given a resampled matrix Ybs which was originally used to make a Clarity or ClarityScan object clearned, we:
-1. Construct a Clarity model for Ybs 
-2. Use it to predict the target
-3. Compute the residual structure of this prediction from the original learned data
+Given a resampled matrix Ybs, a replicate of Y which was originally used to make a Clarity or ClarityScan object clearned, we:
+1. Transform Ybs into YbsT, which "looks as much like Y as possible"
+2. Predict YbsT using clearned
+3. Compute the residual/persistence structure of this prediction
 
 The fit is done with a k that matches that in clearned. If clearned is of class "ClarityScan" then we fit with \code{\link{Clarity_Scan}}, otherwise we fit with \code{\link{Clarity_fixedK}}. We predict the target with \code{\link{Clarity_Predict}}.
 }
 \seealso{
-\code{\link{Clarity_Bootstrap}} which is the recommended way to access this code.
+\code{\link{c_Bootstrap}} which is the recommended way to access this code.
 }

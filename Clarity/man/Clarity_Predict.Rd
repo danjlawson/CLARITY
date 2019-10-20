@@ -11,7 +11,7 @@ Clarity_Predict(Ynew, clist, Ysvd = NULL)
 
 \item{clist}{The learned Clarity object, either of class "Clarity" or of class "ClarityScan"}
 
-\item{Ysvd}{Default NULL. SVD of Y, which is needed for the method="SVD". You can provide it or it will be computed for you when using this method. NB: It should be the SVD of Y-rowMeans(Y) to remove the mean effect!}
+\item{Ysvd}{Default NULL. SVD of Y, which is needed for the method="SVD". You can provide it or it will be computed for you when using this method. NB: It should be the SVD of Y-rowMeans(Y) to remove the mean effect, as computed by \code{\link{c_svd}}.}
 }
 \value{
 An object of the same class as clist provided, with updated Y, X and derived features.

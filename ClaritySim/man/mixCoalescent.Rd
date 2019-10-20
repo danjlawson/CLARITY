@@ -35,7 +35,8 @@ Take a simulated tree as returned by \code{\link{simulateCoalescent}}, rescale i
 }
 \examples{
 set.seed(1)
-mysim<-simulateCoalescent(100,10,200) # Simlulate 100 objects in a 10 dimensional latent space with 200 features
+mysim<-simulateCoalescent(100,10,200)
+# Simlulate 100 objects in a 10 dimensional latent space with 200 features
 similarsim<-transformCoalescent(mysim)
 alternatesim<-mixCoalescent(mysim)
 # alternatesim$Y is the data datamix from package Clarity

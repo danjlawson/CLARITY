@@ -7,7 +7,7 @@
 c_SVD_fixedK(Ysvd, Y, k, verbose = TRUE)
 }
 \arguments{
-\item{Ysvd}{SVD of Y-rowMeans(Y)}
+\item{Ysvd}{SVD of Y-rowMeans(Y) as returned by \code{\link{c_svd}}}
 
 \item{Y}{matrix to be fit}
 
@@ -23,7 +23,7 @@ A Clarity object as described in \code{\link{Clarity_fixedK}}, with the addition
 }
 }
 \description{
-Given data Y, and its mean centred svd Ysvd, and a choice of the number of mixture components k to use,.
+Given data Y, and its mean centred svd Ysvd, and a choice of the number of mixture components k to use.
 }
 \seealso{
 \code{\link{Clarity_fixedK}} for the recommended interface.

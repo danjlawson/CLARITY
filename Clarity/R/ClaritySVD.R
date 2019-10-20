@@ -1,3 +1,15 @@
+###############################
+#' @title Compute mean centered svd
+#' @description
+#' A shorthand for
+#'     \code{svd(Y-rowMeans(Y))}
+#' @param Y matrix to compute centered svd for
+#' @return the svd of Y as returned by base::svd
+#' 
+#' @export
+c_svd <-function(Y){
+    svd(Y-rowMeans(Y))
+}
 ##############################
 #' @title Fit a simplex around a ball
 #'
@@ -87,9 +99,9 @@ c_GetAFromSimplex <- function(Z,ZS){
 #' @title Compute the Clarity model using a mixture model surrounding an SVD embedding data for a fixed size of model k
 #'
 #' @description
-#' Given data Y, and its mean centred svd Ysvd, and a choice of the number of mixture components k to use,.
+#' Given data Y, and its mean centred svd Ysvd, and a choice of the number of mixture components k to use.
 #' 
-#' @param Ysvd SVD of Y-rowMeans(Y)
+#' @param Ysvd SVD of Y-rowMeans(Y) as returned by \code{\link{c_svd}}
 #' @param Y matrix to be fit
 #' @param k the number of mixture components to use
 #' @param verbose (default TRUE) whether to output progress to the terminal.
@@ -135,7 +147,7 @@ c_SVD_fixedK <- function(Ysvd,Y,k,verbose=TRUE){
 #' 
 #' @param Y matrix to be fit
 #' @param kmax (default: NULL, meaning use the data dimension) the maximum number of mixture components to use
-#' @param Ysvd (default: NULL, meaning calculate it) the SVD of Y-rowMeans(Y). If you provide a different object containing locations in the list Ysvd$u, they will be used instead.
+#' @param Ysvd (default: NULL, meaning calculate it) the SVD of Y-rowMeans(Y) as returned by \code{\link{c_svd}}. If you provide a different object containing locations in the list item Ysvd$u, they will be used instead.
 #' @param verbose (default TRUE) whether to output progress to the terminal.
 #' 
 #' @return  A ClarityScan object as described in \code{\link{Clarity_Scan}}, with the additional elements:
@@ -149,7 +161,7 @@ c_SVD_Scan <- function(Y,kmax=NULL,Ysvd=NULL,verbose=TRUE){
     ## Performs a scan over K using the SVD method
     if(is.null(Ysvd)) {
         if(verbose) print(paste("Computing SVD"))
-        Ysvd=svd(Y-rowMeans(Y))
+        Ysvd=c_svd(Y)
     }
     if(is.null(kmax)) kmax=dim(Y)[2]
     klist=1:kmax
@@ -242,7 +254,7 @@ c_SVD_ResidualExtend <- function(clist,kmax=10,verbose=TRUE) {
     if(verbose) print("Using Residual SVD Extension method, computing SVD of residuals")
     ret$R=as.matrix(stats::dist(ret$residual0))
     ret$Ysvd=clist$Ysvd
-    ret$Rsvd=svd(ret$R-rowMeans(ret$R))
+    ret$Rsvd=c_svd(ret$R)
     ret$k0=clist$k
     ret$kmax=kmax
     ret$klist=clist$k + 0:kmax

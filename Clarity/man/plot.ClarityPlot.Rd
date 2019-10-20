@@ -23,10 +23,10 @@ This is a convenience wrapper to \code{\link{Clarity_Chart}} for ClarityPlot obj
 \donttest{
 scan=Clarity_Scan(dataraw) ## Core Clarity
 predmix=Clarity_Predict(datamix,scan) ## Core prediction
-scanbootstrap=Clarity_Bootstrap(scan,target=datamix,D=datarawD)
+pvalmix=Clarity_Compare(scan,D=datarawD,Dnew=datamixD)
 
 ## Plotting: generate a plotting object
-predplot=plot(predmix,signif=scanbootstrap,plot=FALSE)
+predplot=plot(predmix,plot=FALSE)
 ## Plot it
 plot(predplot)
 }

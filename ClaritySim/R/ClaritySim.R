@@ -1,4 +1,78 @@
 ###############################
+#' @title Standard Distance function for Clarity
+#'
+#' @description
+#' Computes the euclidean distance between all points using as.matrix(dist(x)), enforcing the diagonal to take the minimum value of the rest of each row. 
+#'
+#' 
+#' @param x An N by K matrix of N subjects observed at K features
+#' 
+#' @return An N by N matrix of the distances
+#' @seealso \code{\link{resimulatedDistances}}, which computes this "correctly" in a way that is unbiased for the diagonal.
+#' @export
+#' 
+claritysim_dist=function (x){
+    ## Distance with the diagonal set to the next-lowest value
+    d=as.matrix(stats::dist(x))
+    for(i in 1:dim(d)[1]) d[i,i]=min(d[i,-i],d[-i,i])
+    return(d)
+}
+
+###############################
+#' @title Distance between a simulation and replicates of itself with the same structure
+#'
+#' @description
+#' Computes the euclidean distance between all points by replicating the data x to x', and reporting the distance between each x and x' pair. This gives a fair representation of the diagonal.
+#'
+#' See \code{c_dist} in package \code{Clarity} which implements a simpler solution to the diagonal.
+#' 
+#' @param sim A ClaritySim object as returned by \code{simulateCoalescent}
+#' @param nrep (default=100) number of replications to average over
+#' @param distfn (default=as.matrix(stats::dist(x))) distance function to compute
+#' 
+#' @return A ClaritySim object with an updated Y
+#' @seealso \code{\link{claritysim_dist}}, which does it the fast way as recommended in Clarity.
+#' @examples
+#' \donttest{
+#' set.seed(1)
+#' mysim=simulateCoalescent(36,36,L=200,
+#'                          alpha=rep(0,36),sigma0=0.1)
+#' mysim2a<-simulationToDistance(mysim,nrep=500)
+#' mycols=matrix(1,nrow=dim(mysim$Y)[1],ncol=dim(mysim$Y)[2])
+#' diag(mycols)=2
+#' 
+#' plot((mysim$Y),(mysim2a$Y),
+#'      xlab="default: minimum from each row",
+#'      ylab="better: simulationToDistance",col=mycols)
+#' abline(a=0,b=1)
+#' legend("topleft",legend=c("off-diagonal","diagonal"),
+#'        text.col=1:2,bty="n")
+#' }
+#' @export
+#' 
+resimulatedDistances=function(sim,nrep=100,
+                              distfn=function(x)as.matrix(stats::dist(x))){
+    sim2=sim
+    d=dim(sim$D)[1]
+    repdata=lapply(1:nrep,function(rep){
+        Drep = t(apply(sim2$A, 1, function(a) {
+            stats::rnorm(sim2$L, t(a) %*% sim2$D0, sim2$sigma0)
+        }))
+        DT=distfn(rbind(sim$D,Drep))
+        DTsubset=(DT[1:d, d+(1:d)]+
+                  DT[d+(1:d),1:d] )/2
+        DTsubset
+    })
+    Y=repdata[[1]]
+    if(nrep>1) {
+        for(i in 2:nrep) Y=Y+repdata[[i]]
+        Y=Y/nrep
+    }
+    sim2$Y=Y
+    sim2
+}
+
+###############################
 #' @title Simulate features under a ClaritySim "mixture on a tree model"
 #'
 #' @description
@@ -32,7 +106,7 @@ simData=function(sim,L=NULL,sigma=NULL,sigma0=NULL){
         stats::rnorm(sim$L,t(a) %*% sim$D0,sim$sigma0)
     }))
     sim$X=as.matrix(stats::dist(sim$D0))
-    sim$Y=as.matrix(stats::dist(sim$D))
+    sim$Y=claritysim_dist(sim$D)
     colnames(sim$X)=rownames(sim$X)=sim$tree$tip.label
     colnames(sim$Y)=rownames(sim$Y)=rownames(sim$A)
     sim
@@ -145,7 +219,8 @@ simulateCoalescent=function(N, # Number of individuals
 #' @export
 #' @examples
 #' set.seed(1)
-#' mysim<-simulateCoalescent(100,10,200) # Simlulate 100 objects in a 10 dimensional latent space with 200 features
+#' mysim<-simulateCoalescent(100,10,200)
+#' # Simlulate 100 objects in a 10 dimensional latent space with 200 features
 #' similarsim<-transformCoalescent(mysim)
 #' # similarsim$Y is the data datarep from package Clarity
 #' 
@@ -184,7 +259,8 @@ transformCoalescent<-function(sim,multmin=0.1,multmax=2){
 #' @export
 #' @examples
 #' set.seed(1)
-#' mysim<-simulateCoalescent(100,10,200) # Simlulate 100 objects in a 10 dimensional latent space with 200 features
+#' mysim<-simulateCoalescent(100,10,200)
+#' # Simlulate 100 objects in a 10 dimensional latent space with 200 features
 #' similarsim<-transformCoalescent(mysim)
 #' alternatesim<-mixCoalescent(mysim)
 #' # alternatesim$Y is the data datamix from package Clarity

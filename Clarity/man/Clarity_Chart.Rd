@@ -81,16 +81,16 @@ NB The recommended interface is  \code{\link{plot.Clarity}} and \code{\link{plot
 scan=Clarity_Scan(dataraw)
 predmix=Clarity_Predict(datamix,scan)
 scanpred=Clarity_Predict(datamix,scan)
-scanbootstrap=Clarity_Bootstrap(scan,target=datamix,D=datarawD)
+pvalmix=Clarity_Compare(scan,D=datarawD,Dnew=datamixD)
 
 ## The recommended way to plot:
-plot(scanpred,signif=scanbootstrap)
+plot(pvalmix)
 
 ## The manual way to plot:
 ## Extract observed persistences
 P=Clarity_Persistence(predmix)
 ## Compute pvalues
-pvals=Clarity_BScompare(scanbootstrap,P)
+pvals=pvalmix$pvals
 ## pvals is a matrix of dimension N by K
 signif=pvals<0.01
 

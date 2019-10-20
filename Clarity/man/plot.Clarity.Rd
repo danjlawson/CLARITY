@@ -5,14 +5,13 @@
 \title{Plot residuals from a Clarity object}
 \usage{
 \method{plot}{Clarity}(x, signif = NULL, A = NULL, order = NULL,
-  plot = TRUE, rotate = FALSE, thresh = 0.01, type = "mean",
-  diag = NA, summary = abs, population = "bestcol",
-  verbose = FALSE, ...)
+  plot = TRUE, rotate = FALSE, thresh = 0.05, type = "mean",
+  diag = NA, summary = abs, verbose = FALSE, ...)
 }
 \arguments{
-\item{x}{A Clarity object.}
+\item{x}{A Clarity object}
 
-\item{signif}{(default=NULL) either a ClarityBootstrap object as returned by \code{\link{Clarity_Bootstrap}}; or a matrix of p-values as returned by \code{\link{Clarity_BScompare}}; or a logical matrix of elements that are significant (the same dimensions as the similarities modelled in x). In all cases it is transformed to a logical matrix and passed to \code{\link{Clarity_Chart}}.}
+\item{signif}{(default=NULL) a logical matrix of elements that are significant (the same dimensions as the similarities modelled in x). If NULL, a faster plotting method is used.}
 
 \item{A}{(default=NULL) A mixture matrix by which to summarise the matrix using \code{\link{c_Merge}}. This might e.g. represent a clustering of the elements in the similarities. It must be an N (number of subjects) by K' (number of desired clusters) matrix with named columns.}
 
@@ -22,15 +21,13 @@
 
 \item{rotate}{(default=FALSE) whether to rotate the Residuals.}
 
-\item{thresh}{(default=0.01) threshold for translating bootstrapped p-values into significant/not-significant calls for the matrix signif.}
+\item{thresh}{(default=0.05) threshold for translating resampled p-values into significant/not-significant calls for the matrix signif. NULL means use bonferoni correction (0.05/number of elements in matrix); this is often overly conservative.}
 
 \item{type}{(default="mean") if A is not null, should we report the "mean" or the "sum" of the elements in each pair of (soft) clusters?}
 
 \item{diag}{(default=NA) how to treat the diagonal of residuals when plotting residuals, as used by \code{\link{Clarity_Extract}}. Set to NULL to use the observed values, NA to treat them as missing, or 0.}
 
 \item{summary}{(default=abs) how to summarise residuals for plotting (not p-values), as used by \code{\link{Clarity_Extract}}. Set to I to extract the actual residuals.}
-
-\item{population}{(default="bestcol") how to define the null model when computing p-values from bootstrapped data using \code{\link{Clarity_BScompare}}. The default is conservative by comparing each element to the most extreme values in its row, but "element" can be used to compare each element to only bootstrapped versions of itself.}
 
 \item{verbose}{(default=FALSE) whether to output information about what transformations are being done.}
 
@@ -43,29 +40,25 @@ A ClarityPlot object (invisibly) which is a list containing:
 \item A The provided A matrix
 \item R The extracted Persistence matrix, transformed and merged
 \item P0 The raw Persistence matrix as returned from \code{\link{Clarity_Persistence}}
-\item signif0 The raw logical significance matrix, either as provided or as returned from \code{\link{Clarity_BScompare}} if provided with a ClarityScanBootstrap object (same dimension as P0)
+\item signif0 The raw logical significance matrix, either as provided or as returned from \code{\link{c_pval}} if provided with a ClarityScanSignificance object (same dimension as P0)
 \item signif The significance matrix, transformed and merged (same dimension as P)
 }
 }
 \description{
 Plot a Residuals Chart, which is an image representing which subjects are poorly explained by a Clarity fit.
 
-This is the main plot fuction for residuals. It has several convenience manipulations to extract residuals and statistical significance associated with them via bootstrapping, as well as summarising them by clustering or mixtures.
+This is the main plot fuction for residuals. It has several convenience manipulations to extract residuals and statistical significance associated with them, as well as summarising them by clustering or mixtures.
 }
 \examples{
 \donttest{
 scan=Clarity_Scan(dataraw) ## Core Clarity
 predmix=Clarity_Predict(datamix,scan) ## Core prediction
-## Bootstrap residuals
-k10bootstrap=Clarity_Bootstrap(Clarity_Extract(scan,10),
-                               target=datamix, 
-                               D=datarawD)
+## Resample residuals
+k10signif=Clarity_Compare(scan,D=datarawD,Dnew=datamixD,k=10)
 ## Plot Residuals
-plot(Clarity_Extract(predmix,10),
-              signif=k10bootstrap)
+plot(k10signif)
 ## Plot merged clusters
-plot(Clarity_Extract(predmix,10),
-              signif=k10bootstrap,A=datarawA)
+plot(k10signif,A=datarawA)
 
 }
 }

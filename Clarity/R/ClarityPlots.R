@@ -42,16 +42,16 @@
 #' scan=Clarity_Scan(dataraw)
 #' predmix=Clarity_Predict(datamix,scan)
 #' scanpred=Clarity_Predict(datamix,scan)
-#' scanbootstrap=Clarity_Bootstrap(scan,target=datamix,D=datarawD)
+#' pvalmix=Clarity_Compare(scan,D=datarawD,Dnew=datamixD)
 #'
 #' ## The recommended way to plot:
-#' plot(scanpred,signif=scanbootstrap)
+#' plot(pvalmix)
 #'
 #' ## The manual way to plot:
 #' ## Extract observed persistences
 #' P=Clarity_Persistence(predmix)
 #' ## Compute pvalues
-#' pvals=Clarity_BScompare(scanbootstrap,P)
+#' pvals=pvalmix$pvals
 #' ## pvals is a matrix of dimension N by K
 #' signif=pvals<0.01
 #'
@@ -167,19 +167,18 @@ Clarity_Chart<-function(x,
 #' @description
 #' Plot a Residuals Chart, which is an image representing which subjects are poorly explained by a Clarity fit.
 #' 
-#' This is the main plot fuction for residuals. It has several convenience manipulations to extract residuals and statistical significance associated with them via bootstrapping, as well as summarising them by clustering or mixtures.
+#' This is the main plot fuction for residuals. It has several convenience manipulations to extract residuals and statistical significance associated with them, as well as summarising them by clustering or mixtures.
 #'
-#' @param x A Clarity object.
-#' @param signif (default=NULL) either a ClarityBootstrap object as returned by \code{\link{Clarity_Bootstrap}}; or a matrix of p-values as returned by \code{\link{Clarity_BScompare}}; or a logical matrix of elements that are significant (the same dimensions as the similarities modelled in x). In all cases it is transformed to a logical matrix and passed to \code{\link{Clarity_Chart}}.
+#' @param x A Clarity object
+#' @param signif (default=NULL) a logical matrix of elements that are significant (the same dimensions as the similarities modelled in x). If NULL, a faster plotting method is used.
 #' @param A (default=NULL) A mixture matrix by which to summarise the matrix using \code{\link{c_Merge}}. This might e.g. represent a clustering of the elements in the similarities. It must be an N (number of subjects) by K' (number of desired clusters) matrix with named columns.
 #' @param order (default=NULL) preferred order. If NULL, use the provided ordering. Otherwise, either a numeric vector of length N, or a permutation of the rownames of the original similarity Y.
 #' @param plot (default=TRUE) whether to actually create the plot or store the computed matrices for later plotting with \code{\link{plot.ClarityPlot}}.
 #' @param rotate (default=FALSE) whether to rotate the Residuals.
 #' @param type (default="mean") if A is not null, should we report the "mean" or the "sum" of the elements in each pair of (soft) clusters?
-#' @param thresh (default=0.01) threshold for translating bootstrapped p-values into significant/not-significant calls for the matrix signif.
+#' @param thresh (default=0.05) threshold for translating resampled p-values into significant/not-significant calls for the matrix signif. NULL means use bonferoni correction (0.05/number of elements in matrix); this is often overly conservative.
 #' @param diag (default=NA) how to treat the diagonal of residuals when plotting residuals, as used by \code{\link{Clarity_Extract}}. Set to NULL to use the observed values, NA to treat them as missing, or 0.
 #' @param summary (default=abs) how to summarise residuals for plotting (not p-values), as used by \code{\link{Clarity_Extract}}. Set to I to extract the actual residuals.
-#' @param population (default="bestcol") how to define the null model when computing p-values from bootstrapped data using \code{\link{Clarity_BScompare}}. The default is conservative by comparing each element to the most extreme values in its row, but "element" can be used to compare each element to only bootstrapped versions of itself.
 #' @param verbose (default=FALSE) whether to output information about what transformations are being done.
 #' @param ... Additional parameters to \code{\link{Clarity_Chart}}.
 #'
@@ -189,7 +188,7 @@ Clarity_Chart<-function(x,
 #' \item A The provided A matrix
 #' \item R The extracted Persistence matrix, transformed and merged
 #' \item P0 The raw Persistence matrix as returned from \code{\link{Clarity_Persistence}}
-#' \item signif0 The raw logical significance matrix, either as provided or as returned from \code{\link{Clarity_BScompare}} if provided with a ClarityScanBootstrap object (same dimension as P0)
+#' \item signif0 The raw logical significance matrix, either as provided or as returned from \code{\link{c_pval}} if provided with a ClarityScanSignificance object (same dimension as P0)
 #' \item signif The significance matrix, transformed and merged (same dimension as P)
 #' }
 #' @seealso \code{\link{Clarity_Chart}} which ultimately does the plotting; \code{\link{plot.ClarityPlot}} which is called to perform that plotting; \code{\link{c_MergeSquare}} which is used to perform simplification using the mixture matrix A. \code{\link{c_legend}} for one way to present a legend.
@@ -197,16 +196,12 @@ Clarity_Chart<-function(x,
 #' \donttest{
 #' scan=Clarity_Scan(dataraw) ## Core Clarity
 #' predmix=Clarity_Predict(datamix,scan) ## Core prediction
-#' ## Bootstrap residuals
-#' k10bootstrap=Clarity_Bootstrap(Clarity_Extract(scan,10),
-#'                                target=datamix, 
-#'                                D=datarawD)
+#' ## Resample residuals
+#' k10signif=Clarity_Compare(scan,D=datarawD,Dnew=datamixD,k=10)
 #' ## Plot Residuals
-#' plot(Clarity_Extract(predmix,10),
-#'               signif=k10bootstrap)
+#' plot(k10signif)
 #' ## Plot merged clusters
-#' plot(Clarity_Extract(predmix,10),
-#'               signif=k10bootstrap,A=datarawA)
+#' plot(k10signif,A=datarawA)
 #' 
 #' }
 #' @export
@@ -216,25 +211,20 @@ plot.Clarity=function(x,
                       order=NULL,
                       plot=TRUE,
                       rotate=FALSE,
-                      thresh=0.01,
+                      thresh=0.05,
                       type="mean",
                       diag=NA,
                       summary=abs,
-                      population="bestcol",
                       verbose=FALSE,
                       ...){
     if(!any(is.null(signif))) {
-        if(class(signif)=="ClarityBootstrap"){
-            if(verbose)print("Extracting Residuals from provided ClarityBootstrap")
-            R0=Clarity_Extract(x,diag=0)
-            signif=Clarity_BScompare(signif,R0,population=population)
-        }
         if(class(signif)=="matrix"){
-         if(class(signif[1,1])=="numeric") {
+            if(is.null(thresh)) thresh=0.05/dim(signif)[1]/dim(signif)[2]
+            if(class(signif[1,1])=="numeric") {
                 if(verbose)print(paste("Applying significance threshold",thresh))
                 signif=signif<thresh
          }else if(verbose)print("Provided with significance matrix")
-        }else stop("Invalid class of signif object, must either be a ClarityBootstrap or a matrix")
+        }else stop("Invalid class of signif object, must either be a ClaritySignificance or a matrix")
     }
     signif0=signif
     if(!any(is.null(A))) {
@@ -273,22 +263,19 @@ plot.Clarity=function(x,
 #' @description
 #' Plot a Persistence Chart, which is an image representing which subjects are poorly explained by a Clarity fit.
 #' 
-#' This is the main plot fuction for persistences. It has several convenience manipulations to extract persistences and statistical significance associated with them via bootstrapping, as well as summarising them by clustering or mixtures.
+#' This is the main plot fuction for persistences. It has several convenience manipulations to extract persistences and statistical significance associated with them, as well as summarising them by clustering or mixtures.
 #'
 #' @param x A ClarityScan object.
-#' @param signif (default=NULL) either a ClarityScanBootstrap object as returned by \code{\link{Clarity_Bootstrap}}; or a matrix of p-values as returned by \code{\link{Clarity_BScompare}}; or a logical matrix of elements that are significant (the same dimensions as the similarities modelled in x). In all cases it is transformed to a logical matrix and passed to \code{\link{Clarity_Chart}}.
+#' @param signif (default=NULL) a matrix of p-values as returned by \code{\link{c_Scoresplit}}; or a logical matrix of elements that are significant (the same dimensions as the similarities modelled in x). In all cases it is transformed to a logical matrix and passed to \code{\link{Clarity_Chart}}.
 #' @param A (default=NULL) A mixture matrix by which to summarise the matrix using \code{\link{c_MergeSquare}}. This might e.g. represent a clustering of the elements in the similarities. It must be an N (number of subjects) by K' (number of desired clusters) matrix with named columns.
 #' @param order (default=NULL) preferred order. If NULL, use the provided ordering. Otherwise, either a numeric vector of length N, or a permutation of the rownames of the original similarity Y.
 #' @param rotate (default=FALSE) whether to rotate the Persistences. If FALSE (default) then the complexity K is the Y-axis. If TRUE then the complexity K is the X-axis.
 #' @param plot (default=TRUE) whether to actually create the plot or store the computed matrices for later plotting with \code{\link{plot.ClarityPlot}}.
 #' @param type (default="mean") if A is not null, should we report the "mean" or the "sum" of the elements in each pair of (soft) clusters?
 #' @param kmax (default=NULL) if provided, persistences above kmax are not included in the plot.
-#' @param thresh (default=0.01) threshold for translating bootstrapped p-values into significant/not-significant calls for the matrix signif.
-#' @param diag (default=0) how to treat the diagonal of residuals when computing persistences, as used by \code{\link{Clarity_Persistence}}. Set to NULL to use the observed values, but the default 0 is recommended.
+#' @param thresh (default=0.05) threshold for translating resampled p-values into significant/not-significant calls for the matrix signif. NULL means use bonferoni correction (0.05/number of elements in matrix) which is often overly conservative.
 #' @param f (default="RowSumsSquared") how to summarise residuals into persistences, as used by \code{\link{Clarity_Persistence}}.
 #' @param what (default="Yresid") what to extract from each complexity when computing persistences, as used by \code{\link{Clarity_Persistence}}.
-#' @param summary (default=abs) how to summarise residuals into persistences, as used by \code{\link{Clarity_Persistence}}.
-#' @param population (default="bestcol") how to define the null model when computing p-values from bootstrapped data using \code{\link{Clarity_BScompare}}. The default is conservative by comparing each element to the most extreme values in its row, but "element" can be used to compare each element to only bootstrapped versions of itself.
 #' @param verbose (default=FALSE) whether to output information about what transformations are being done.
 #' @param ... Additional parameters to  \code{\link{Clarity_Chart}}.
 #'
@@ -298,7 +285,7 @@ plot.Clarity=function(x,
 #' \item A The provided A matrix
 #' \item P The extracted Persistence matrix, transformed and merged
 #' \item P0 The raw Persistence matrix as returned from \code{\link{Clarity_Persistence}}
-#' \item signif0 The raw logical significance matrix, either as provided or as returned from \code{\link{Clarity_BScompare}} if provided with a ClarityScanBootstrap object (same dimension as P0)
+#' \item signif0 The raw logical significance matrix, either as provided or as returned from \code{\link{c_pval}} if provided with a ClarityScanSignificance object (same dimension as P0)
 #' \item signif The significance matrix, transformed and merged (same dimension as P)
 #' \item rotate logical indicating whether we rotated the matrices
 #' }
@@ -307,14 +294,16 @@ plot.Clarity=function(x,
 #' \donttest{
 #' scan=Clarity_Scan(dataraw) ## Core Clarity
 #' predmix=Clarity_Predict(datamix,scan) ## Core prediction
-#' scanbootstrap=Clarity_Bootstrap(scan,
-#'                                 target=datamix,
-#'                                 D=datarawD)
+#' pvalmix=Clarity_Compare(scan,
+#'                                 D=datarawD,
+#'                                 Dnew=datamixD)
 #' 
 #' ## Plotting:
-#' plot(predmix,signif=scanbootstrap)
+#' plot(pvalmix)
+#' ## Plotting without p-values:
+#' plot(predmix)
 #' ## Merged clusters:
-#' plot(predmix,signif=scanbootstrap,A=datarawA)
+#' plot(pvalmix,A=datarawA)
 #' }
 #' @export
 plot.ClarityScan=function(x,
@@ -325,31 +314,24 @@ plot.ClarityScan=function(x,
                           plot=TRUE,
                           type="mean",
                           kmax=NULL,
-                          thresh=0.01,
-                          diag=0,
+                          thresh=0.05,
                           f = "RowSumsSquared",
                           what = "Yresid",
-                          summary = abs,
-                          population="bestcol",
                           verbose=FALSE,
                           ...){
     if(!any(is.null(signif))) {
-        if(class(signif)=="ClarityScanBootstrap"){
-            if(verbose)print("Extracting Persistence from provided ClarityScanBootstrap")
-            P0=Clarity_Persistence(x,f=f,what=what,summary=abs,diag=diag)
-            signif=Clarity_BScompare(signif,P0,population=population)
-        }
         if(class(signif)=="matrix"){
+            if(is.null(thresh)) thresh=0.05/dim(signif)[1]/dim(signif)[2]
          if(class(signif[1,1])=="numeric") {
                 if(verbose)print(paste("Applying significance threshold",thresh))
                 signif=signif<thresh
          }else if(verbose)print("Provided with significance matrix")
-        }else stop("Invalid class of signif object, must either be a ClarityScanBootstrap or a matrix")
+        }else stop("Invalid class of signif object, must either be a ClarityScanSignificance or a matrix")
     }
     signif0=signif
     if(!any(is.null(A))) {
         if(verbose)print("Computing Persistence")
-        P0=Clarity_Persistence(x,f=f,what=what,summary=abs,diag=0)
+        P0=Clarity_Persistence(x,f=f,what=what)
         if(verbose)print("Merging persistence with provided with mixture matrix A")
         P=c_Merge(P0,A,rotate=rotate,type=type)
         if(!any(is.null(signif))) {
@@ -358,7 +340,7 @@ plot.ClarityScan=function(x,
         }
     }else{
         if(verbose)print("Computing Persistence")
-        P0=P=Clarity_Persistence(x,f=f,what=what,summary=abs,diag=diag)
+        P0=P=Clarity_Persistence(x,f=f,what=what)
         if(rotate) {
             if(verbose)print("Rotating persistence")
             P0=P=t(P)
@@ -415,10 +397,10 @@ plot.ClarityScan=function(x,
 #' \donttest{
 #' scan=Clarity_Scan(dataraw) ## Core Clarity
 #' predmix=Clarity_Predict(datamix,scan) ## Core prediction
-#' scanbootstrap=Clarity_Bootstrap(scan,target=datamix,D=datarawD)
+#' pvalmix=Clarity_Compare(scan,D=datarawD,Dnew=datamixD)
 #' 
 #' ## Plotting: generate a plotting object
-#' predplot=plot(predmix,signif=scanbootstrap,plot=FALSE)
+#' predplot=plot(predmix,plot=FALSE)
 #' ## Plot it
 #' plot(predplot)
 #' }
@@ -448,6 +430,34 @@ plot.ClarityPlot=function(x,order=NULL,...){
     invisible(Clarity_Chart(val,signif=x$signif,...))
 }
 
+###############################
+#' @title Plot residuals and p-values from a ClaritySignificance object 
+#'
+#' @description
+#' Plot a Residuals Chart, which is an image representing which subjects are poorly explained by a Clarity fit.
+#'
+#' @param x A ClaritySignificance object as returned by \code{\link{Clarity_Compare}}
+#' @param ... Extra parameters to \code{\link{plot.Clarity}}. Of particular relevence is \code{thresh} which controls the significance threshold.
+#' @return A ClarityPlot object (see \code{\link{plot.Clarity}}.
+#' @export
+plot.ClaritySignificance<-function(x,...){
+    plot.Clarity(x$pred,signif=x$pvals,...)
+}
+
+###############################
+#' @title Plot residuals and p-values from a ClarityScanSignificance object 
+#'
+#' @description
+#' Plot a Persistence Chart, which is an image representing which subjects are poorly explained by a Clarity fit.
+#'
+#' @param x A ClarityScanSignificance object as returned by \code{\link{Clarity_Compare}}
+#' @param ... Extra parameters to \code{\link{plot.ClarityScan}}. Of particular relevence is \code{thresh} which controls the significance threshold.
+#' @return A ClarityScanPlot object (see \code{\link{plot.ClarityScan}}.
+#' @export
+plot.ClarityScanSignificance<-function(x,...){
+    plot.ClarityScan(x$pred,signif=x$pvals,...)
+}
+
 
 ###############################
 #' @title Plot a legend that describes how CLARITY shows significance
@@ -473,11 +483,10 @@ plot.ClarityPlot=function(x,order=NULL,...){
 #' @examples
 #' \donttest{
 #' scan=Clarity_Scan(dataraw) ## Core Clarity
-#' predmix=Clarity_Predict(datamix,scan) ## Core prediction
 #'
-#' ## Plot bootstrapped persistence chart
-#' scanbootstrap=Clarity_Bootstrap(scan,target=datamix,D=datarawD)
-#' predplot=plot(predmix,signif=scanbootstrap)
+#' ## Plot persistence chart with p-values
+#' scanpred=Clarity_Compare(scan,D=datarawD,Dnew=datamixD)
+#' predplot=plot(scanpred)
 #' ## Add the legend outside of the regular image space
 #' c_legend(0,22,size=c(10,0.5))
 #' }

@@ -44,11 +44,10 @@ You might want to show this some other way, but this can work with manual tuning
 \examples{
 \donttest{
 scan=Clarity_Scan(dataraw) ## Core Clarity
-predmix=Clarity_Predict(datamix,scan) ## Core prediction
 
-## Plot bootstrapped persistence chart
-scanbootstrap=Clarity_Bootstrap(scan,target=datamix,D=datarawD)
-predplot=plot(predmix,signif=scanbootstrap)
+## Plot persistence chart with p-values
+scanpred=Clarity_Compare(scan,D=datarawD,Dnew=datamixD)
+predplot=plot(scanpred)
 ## Add the legend outside of the regular image space
 c_legend(0,22,size=c(10,0.5))
 }

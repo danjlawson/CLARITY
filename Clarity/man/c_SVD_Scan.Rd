@@ -11,7 +11,7 @@ c_SVD_Scan(Y, kmax = NULL, Ysvd = NULL, verbose = TRUE)
 
 \item{kmax}{(default: NULL, meaning use the data dimension) the maximum number of mixture components to use}
 
-\item{Ysvd}{(default: NULL, meaning calculate it) the SVD of Y-rowMeans(Y). If you provide a different object containing locations in the list Ysvd$u, they will be used instead.}
+\item{Ysvd}{(default: NULL, meaning calculate it) the SVD of Y-rowMeans(Y) as returned by \code{\link{c_svd}}. If you provide a different object containing locations in the list item Ysvd$u, they will be used instead.}
 
 \item{verbose}{(default TRUE) whether to output progress to the terminal.}
 }

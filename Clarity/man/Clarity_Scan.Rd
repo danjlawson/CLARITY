@@ -47,10 +47,12 @@ Several methods are available:
 scan=Clarity_Scan(dataraw) # SVD method model fit
 ## Onward analysis:
 predmix=Clarity_Predict(datamix,scan) ## Core prediction
+## Core persistence plot 
+plot(predmix)
 ## Bootstrap based on arbitrary resampling scheme
-scanbootstrap=Clarity_Bootstrap(scan,target=datamix,D=dataraw)
-## Core persistence plot
-plot(predmix,signif=scanbootstrap)
+comparemix=Clarity_Compare(scan,target=datamix,D=dataraw)
+## Core persistence plot including uncertainty
+plot(comparemix)
 }
 \dontrun{
 scanmult=Clarity_Scan(dataraw,method="M") # Multiplicative method model fit
@@ -58,6 +60,6 @@ scanmult=Clarity_Scan(dataraw,method="M",clist=scanmult) # Iterate the Multiplic
 }
 }
 \seealso{
-\code{\link{Clarity_fixedK}} for the details of what a "Clarity" object is. \code{\link{Clarity_Predict}} to make an initial prediction of the new data. \code{\link{plot.ClarityScan}} for plotting, \code{\link{Clarity_Bootstrap}} for quantifying uncertainty. \code{\link{Clarity_ObjectivePlot}} for comparing quality of fit as a function of \code{k}.
+\code{\link{Clarity_fixedK}} for the details of what a "Clarity" object is. \code{\link{Clarity_Predict}} to make an initial prediction of the new data. \code{\link{plot.ClarityScan}} for plotting, \code{\link{Clarity_Compare}} for quantifying uncertainty. \code{\link{Clarity_ObjectivePlot}} for comparing quality of fit as a function of \code{k}.
 }
 \keyword{mixture}

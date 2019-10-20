@@ -21,7 +21,8 @@ Take a simulated tree and multiply each edge length by a random amount to genera
 }
 \examples{
 set.seed(1)
-mysim<-simulateCoalescent(100,10,200) # Simlulate 100 objects in a 10 dimensional latent space with 200 features
+mysim<-simulateCoalescent(100,10,200)
+# Simlulate 100 objects in a 10 dimensional latent space with 200 features
 similarsim<-transformCoalescent(mysim)
 # similarsim$Y is the data datarep from package Clarity
 
