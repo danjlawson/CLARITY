@@ -31,7 +31,7 @@ Clarity_Extract=function(cscan,what="Yresid",summary=abs,diag=0,k=NULL){
             ret=cscan[["Yresid"]]^2
         }else ret=summary(cscan[[what]])
     }else if(class(cscan)=="ClarityScan"){
-        if(class(what)=="numeric") return(cscan$scan[[what]])
+        if(is.numeric(what)) return(cscan$scan[[what]])
         if(!is.null(k)) {
             if(what=="Rsq") {
                 ret=cscan$scan[[k]][["Yresid"]]^2
@@ -139,6 +139,46 @@ c_dist=function (x){
     d=as.matrix(stats::dist(x))
     return(c_fixdiagonals(d,min))
 }
+
+###############################
+#' @title Cross validatation method to estimate the number of PCs associated with structure in a Ylist
+#'
+#' @description
+#' From a list of pairs of resampled matrices with the same distribution, use the first to predict the second. The prediction error is then used to form an estimate of the number of dimensions that are increasing predictive power.
+#' 
+#' This is summarised in 2 ways. Firstly, a point estimate of kmax: the minimum of the average prediction error. Secondly, a soft estimate of Kmax: the proportion of samples that have a minimum prediction error larger than a given K.
+#' 
+#' @param datalist A list of pairs of N by N matrices, each independently sampled from the same data source as described in \code{\link{Clarity_Predict}}.
+#' @param kmax (default=NULL, meaning use the dimension of the data)
+#' @param ... additional parameters to \code{link{Clarity_Scan}}.
+#' 
+#' @return An list containing:
+#' \itemize{
+#' \item min.score : the point estimate of kmax, obtained from the minimum average prediction error.
+#' \item scores : the average prediction error at each complexity \code{K}.
+#' \item softk : For each complexity \code{K}, the probability that the estimated \code{K'} is at least as large as \code{K}.
+#' }
+#' @seealso \code{\link{Clarity_Compare}}, which takes an argument distfn which can be given this or another function that generates a similarity from feature data.
+#' 
+#' @export
+#' 
+c_crossvalidate=function(datalist,kmax=NULL,...){
+    if(is.null(kmax)){
+        d=datalist[[1]]
+        kmax=dim(d[[1]])[[1]]-1
+    }
+    scoremat=sapply(datalist,function(d){
+        cp=Clarity_Scan(d[[1]],v=F,kmax=kmax,...)
+        scores=sapply(1:length(cp$scan),
+                      function(i)sum((cp$scan[[i]]$prediction-d[[2]])^2))
+        scores
+    })
+    avescores=rowMeans(scoremat)
+    scoredist=ecdf(apply(scoremat,2,which.min))
+    scores=scoredist(1:dim(scoremat)[1])
+    return(list(min.score=which.min(avescores), scores=avescores,softk=1-scores))
+}
+
 
 ###############################
 #' @title Compare a new dissimilarity matrix to another via the learned Clarity model
@@ -295,6 +335,8 @@ Clarity_Compare <- function(clearned,
                                      k=k,kmax=kmax,verbose=verbose,...)
 
 ### Compute p-values
+        if(verbose) cat("Performing cross validation to estimate the maximum complexity.\n")
+        cv=c_crossvalidate(Ylist)
         if(verbose) cat("Computing pvalues from resampling procedure.\n")
         pvals=c_Scoresplit(csplitlist)
         if(class(pred)=="Clarity"){
@@ -306,6 +348,7 @@ Clarity_Compare <- function(clearned,
             Ynew=Ynew,
             Yobs=clearned$Y,
             YnewT=YnewT,
+            Ylist=Ylist,
             pred=pred,
             splitlist=csplitlist,
             pvals=pvals,
@@ -328,23 +371,27 @@ Clarity_Compare <- function(clearned,
 #' @title Emprical estimator for comparing distributions
 #'
 #' @description
-#' the probability that a sample of a distribution (x2) is greater than the sample of another distribution (x1), using their emprical distribution functions.
+#' the probability that a sample of a distribution (x2) is less than or equal to the sample of another distribution (x1), using their emprical distribution functions. A regularisation is included, to prevent 0s.
 #'
 #' Probability that x2>=x1 is
 #' sum_{i=1}^N pr(x1=x) pr(x2<=x)
-#' = (1/(1+length(x))) e2(x1)
+#' = (1/(reg+length(x))) e2(c(reg,x1))
 #'
 #' @param x1 A set of samples from the reference distribution
 #' @param x2 A set of samples from the query distribution
 #' @return the probability that a sample from the query is larger than the reference.
 #' @export
 #' @seealso \code{\link{Clarity_Compare}}, the recommended way to access this code.
-c_px2_gt_x1<-function(x1,x2){
+#' @examples
+#' c_px2_lt_x1(0,1) # 0.5 due to regularization
+#' c_px2_lt_x1(0,1,0) # 0
+#' c_px2_lt_x1(0:2,1:3,0) # 1/3
+c_px2_lt_x1<-function(x1,x2,reg=1){
     d1=sort(x1)
     d2=sort(x2)
     e2=stats::ecdf(d2)
     ##  sum(e2(d1)/(1+length(d1)))
-    sum(c(1,e2(d1))/(1+length(d1)))
+    sum(c(reg,e2(d1))/(reg+length(d1)))
 }
 
 ###############################
@@ -362,14 +409,14 @@ c_px2_gt_x1<-function(x1,x2){
 #' 
 #' @return the probability that a sample from the query is larger than the reference.
 #' @export
-c_Scoresplit=function(scorelist,comparison=c_px2_gt_x1){
+c_Scoresplit=function(scorelist,comparison=c_px2_lt_x1){
     size1=dim(scorelist[[1]][[1]])[1]
     size2=dim(scorelist[[1]][[1]])[2]
     ret=t(sapply(1:size1,function(i){
         sapply(1:size2,function(j){
             d1=sapply(1:length(scorelist),function(rep) scorelist[[rep]][[1]][i,j])
             d2=sapply(1:length(scorelist),function(rep) scorelist[[rep]][[2]][i,j])
-            c_px2_gt_x1(d1,d2)
+            comparison(d1,d2)
         })
     }))
     ret
