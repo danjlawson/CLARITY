@@ -4,8 +4,15 @@
 \alias{c_initKmeans}
 \title{Initialise A and X in Clarity using Kmeans}
 \usage{
-c_initKmeans(Y, K, a = 0.9, sigma = 1e-04, sigmaY = 1e-05,
-  nstart = 1000, iter.max = 50)
+c_initKmeans(
+  Y,
+  K,
+  a = 0.9,
+  sigma = 1e-04,
+  sigmaY = 1e-05,
+  nstart = 1000,
+  iter.max = 50
+)
 }
 \arguments{
 \item{Y}{An N by N non-negative matrix of similarities}

@@ -4,8 +4,13 @@
 \alias{Clarity_Extend}
 \title{Extend a ClarityScan to match new data}
 \usage{
-Clarity_Extend(clist, kmax = 10, extend = "Residual", method = "SVD",
-  verbose = TRUE)
+Clarity_Extend(
+  clist,
+  kmax = 10,
+  extend = "Residual",
+  method = "SVD",
+  verbose = TRUE
+)
 }
 \arguments{
 \item{clist}{A learned Clarity object, of class "Clarity".}

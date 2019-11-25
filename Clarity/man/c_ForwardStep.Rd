@@ -4,9 +4,16 @@
 \alias{c_ForwardStep}
 \title{Update a Clarity estimate by scanning over increasing K}
 \usage{
-c_ForwardStep(clist, verbose = TRUE, tmax = 10000,
-  matrixdistmin = NULL, objectivedistmin = NULL, alpha = 0.9,
-  dirichletbeta = 1, ...)
+c_ForwardStep(
+  clist,
+  verbose = TRUE,
+  tmax = 10000,
+  matrixdistmin = NULL,
+  objectivedistmin = NULL,
+  alpha = 0.9,
+  dirichletbeta = 1,
+  ...
+)
 }
 \arguments{
 \item{clist}{A list of Clarity objects as returned by \code{\link{Clarity_Scan}}}

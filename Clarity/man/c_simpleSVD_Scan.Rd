@@ -4,8 +4,7 @@
 \alias{c_simpleSVD_Scan}
 \title{Compute the Clarity model by SVD embedding data for a range of model sizes}
 \usage{
-c_simpleSVD_Scan(Y, kmax = NULL, Ysvd = NULL, verbose = TRUE,
-  Xtype = "X")
+c_simpleSVD_Scan(Y, kmax = NULL, Ysvd = NULL, verbose = TRUE, Xtype = "X")
 }
 \arguments{
 \item{Y}{matrix to be fit}

@@ -4,10 +4,21 @@
 \alias{plot.ClarityScan}
 \title{Plot persistences from a ClarityScan object}
 \usage{
-\method{plot}{ClarityScan}(x, signif = NULL, A = NULL, order = NULL,
-  rotate = FALSE, plot = TRUE, type = "mean", kmax = NULL,
-  thresh = 0.05, f = "RowSumsSquared", what = "Yresid",
-  verbose = FALSE, ...)
+\method{plot}{ClarityScan}(
+  x,
+  signif = NULL,
+  A = NULL,
+  order = NULL,
+  rotate = FALSE,
+  plot = TRUE,
+  type = "mean",
+  kmax = NULL,
+  thresh = 0.05,
+  f = "RowSumsSquared",
+  what = "Yresid",
+  verbose = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{A ClarityScan object.}

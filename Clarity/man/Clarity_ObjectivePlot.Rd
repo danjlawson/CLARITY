@@ -4,11 +4,26 @@
 \alias{Clarity_ObjectivePlot}
 \title{Plot the residuals of a set of ClarityScan objects as a function of k}
 \usage{
-Clarity_ObjectivePlot(clist, add = FALSE, legendloc = "bottomleft",
-  legendbty = "n", name = NULL, lty = NULL, col = NULL,
-  pch = NULL, lwd = NULL, lines = TRUE, points = TRUE,
-  xlim = NULL, ylim = NULL, xlab = "K",
-  ylab = "Objective Function", main = "", extern = TRUE, ...)
+Clarity_ObjectivePlot(
+  clist,
+  add = FALSE,
+  legendloc = "bottomleft",
+  legendbty = "n",
+  name = NULL,
+  lty = NULL,
+  col = NULL,
+  pch = NULL,
+  lwd = NULL,
+  lines = TRUE,
+  points = TRUE,
+  xlim = NULL,
+  ylim = NULL,
+  xlab = "K",
+  ylab = "Objective Function",
+  main = "",
+  extern = TRUE,
+  ...
+)
 }
 \arguments{
 \item{clist}{the list of P clarityscan objects}

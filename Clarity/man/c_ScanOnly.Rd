@@ -4,8 +4,16 @@
 \alias{c_ScanOnly}
 \title{Scan over K to learn a list of Clarity objects}
 \usage{
-c_ScanOnly(Y, kmax = 20, tmax = 10000, matrixdistmin = 1e-08,
-  objectivedistmin = 0.001, printskip = 1000, verbose = TRUE, ...)
+c_ScanOnly(
+  Y,
+  kmax = 20,
+  tmax = 10000,
+  matrixdistmin = 1e-08,
+  objectivedistmin = 0.001,
+  printskip = 1000,
+  verbose = TRUE,
+  ...
+)
 }
 \arguments{
 \item{Y}{An N by N non-negative matrix of similarities}

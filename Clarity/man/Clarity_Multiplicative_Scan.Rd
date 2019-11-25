@@ -4,9 +4,18 @@
 \alias{Clarity_Multiplicative_Scan}
 \title{Run The full Clarity algorithm}
 \usage{
-Clarity_Multiplicative_Scan(Y, kmax = 20, clist = NULL, niter = 10,
-  thresh = 0.1, tmax = 10000, verbose = TRUE,
-  matrixdistmin = 1e-08, objectivedistmin = 0.001, ...)
+Clarity_Multiplicative_Scan(
+  Y,
+  kmax = 20,
+  clist = NULL,
+  niter = 10,
+  thresh = 0.1,
+  tmax = 10000,
+  verbose = TRUE,
+  matrixdistmin = 1e-08,
+  objectivedistmin = 0.001,
+  ...
+)
 }
 \arguments{
 \item{Y}{An N by N non-negative matrix of similarities}

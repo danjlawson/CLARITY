@@ -4,10 +4,21 @@
 \alias{c_legend}
 \title{Plot a legend that describes how CLARITY shows significance}
 \usage{
-c_legend(x, y, size = c(0.5, 0.5), rectdelta = c(0.8, 0.8),
-  imageback = "white", border = "grey", cex.text = 1.5, gap = 0,
-  laboffset = 0.1, col = "#FF0000FF", signiffade = "55", xpd = NA,
-  text = c("Significant", "Not Significant"))
+c_legend(
+  x,
+  y,
+  size = c(0.5, 0.5),
+  rectdelta = c(0.8, 0.8),
+  imageback = "white",
+  border = "grey",
+  cex.text = 1.5,
+  gap = 0,
+  laboffset = 0.1,
+  col = "#FF0000FF",
+  signiffade = "55",
+  xpd = NA,
+  text = c("Significant", "Not Significant")
+)
 }
 \arguments{
 \item{x}{the x location of the legend (center of the top element); you can specifiy top and bottom elements locations by giving two values.}

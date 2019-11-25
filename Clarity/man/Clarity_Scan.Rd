@@ -4,8 +4,7 @@
 \alias{Clarity_Scan}
 \title{Run the full Clarity algorithm to fit a range of mixture models to data.}
 \usage{
-Clarity_Scan(Y, kmax = 20, method = "SVDX", clist = NULL,
-  verbose = TRUE, ...)
+Clarity_Scan(Y, kmax = 20, method = "SVDX", clist = NULL, verbose = TRUE, ...)
 }
 \arguments{
 \item{Y}{The similarity or distance matrix to be fitted. In principle any square matrix is allowed but algorithmically you may have problems if it is non-negative or rank-deficient.}

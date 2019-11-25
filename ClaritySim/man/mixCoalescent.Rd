@@ -4,8 +4,14 @@
 \alias{mixCoalescent}
 \title{Add a mixture edge to a coalescent for use in Clarity}
 \usage{
-mixCoalescent(sim, beta = 0.5, qmin = 0.5, transform = TRUE,
-  fraction = 0.5, ...)
+mixCoalescent(
+  sim,
+  beta = 0.5,
+  qmin = 0.5,
+  transform = TRUE,
+  fraction = 0.5,
+  ...
+)
 }
 \arguments{
 \item{sim}{A simulated coalescent as returned by \code{\link{simulateCoalescent}}}

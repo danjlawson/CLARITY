@@ -4,9 +4,20 @@
 \alias{plot.Clarity}
 \title{Plot residuals from a Clarity object}
 \usage{
-\method{plot}{Clarity}(x, signif = NULL, A = NULL, order = NULL,
-  plot = TRUE, rotate = FALSE, thresh = 0.05, type = "mean",
-  diag = NA, summary = abs, verbose = FALSE, ...)
+\method{plot}{Clarity}(
+  x,
+  signif = NULL,
+  A = NULL,
+  order = NULL,
+  plot = TRUE,
+  rotate = FALSE,
+  thresh = 0.05,
+  type = "mean",
+  diag = NA,
+  summary = abs,
+  verbose = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{A Clarity object}

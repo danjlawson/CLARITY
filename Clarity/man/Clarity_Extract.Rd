@@ -4,8 +4,7 @@
 \alias{Clarity_Extract}
 \title{Extract objects from a Clarity or ClarityScan object}
 \usage{
-Clarity_Extract(cscan, what = "Yresid", summary = abs, diag = 0,
-  k = NULL)
+Clarity_Extract(cscan, what = "Yresid", summary = abs, diag = 0, k = NULL)
 }
 \arguments{
 \item{cscan}{A Clarity or ClarityScan object}

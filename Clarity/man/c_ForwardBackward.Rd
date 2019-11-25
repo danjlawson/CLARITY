@@ -4,9 +4,16 @@
 \alias{c_ForwardBackward}
 \title{Update a Clarity estimate by scanning over K}
 \usage{
-c_ForwardBackward(clist, niter = 10, thresh = -1, tmax = 10000,
-  verbose = TRUE, matrixdistmin = 1e-08, objectivedistmin = 0.001,
-  ...)
+c_ForwardBackward(
+  clist,
+  niter = 10,
+  thresh = -1,
+  tmax = 10000,
+  verbose = TRUE,
+  matrixdistmin = 1e-08,
+  objectivedistmin = 0.001,
+  ...
+)
 }
 \arguments{
 \item{clist}{A list of Clarity objects as returned by \code{\link{Clarity_Scan}}}

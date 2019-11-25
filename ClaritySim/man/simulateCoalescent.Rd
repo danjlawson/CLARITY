@@ -4,9 +4,18 @@
 \alias{simulateCoalescent}
 \title{simulate similarities under a coalescent model}
 \usage{
-simulateCoalescent(N, K, L = 200, alpha = rep(0.2, K), sigma = 0.1,
-  sigma0 = 0.01, tree = NULL, A = NULL, Amodel = "sample",
-  minedge = 0)
+simulateCoalescent(
+  N,
+  K,
+  L = 200,
+  alpha = rep(0.2, K),
+  sigma = 0.1,
+  sigma0 = 0.01,
+  tree = NULL,
+  A = NULL,
+  Amodel = "sample",
+  minedge = 0
+)
 }
 \arguments{
 \item{N}{Number of samples}

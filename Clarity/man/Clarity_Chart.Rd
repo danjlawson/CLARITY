@@ -4,14 +4,36 @@
 \alias{Clarity_Chart}
 \title{Plot a matrix in the Clarity "Persistence Chart" style}
 \usage{
-Clarity_Chart(x, signif = NULL, mar = c(6, 6, 4, 1), scalefun = sqrt,
-  zlim = NULL, cols = (grDevices::colorRampPalette(c("white", "yellow",
-  "orange", "red", "darkred")))(100), text = FALSE, cex.text = 1,
-  digits = 2, axes = TRUE, las.axis = 1, cex.axis = 1,
-  cex.axis.X = NULL, cex.axis.Y = NULL, axis.top = FALSE,
-  etext = NULL, etextgap = 0.25, cex.etext = 1, userect = FALSE,
-  rectdelta = c(0.8, 0.8), signiffade = "55", imageback = "white",
-  tol = 1e-10, main = "", xlab = "", ylab = "", ...)
+Clarity_Chart(
+  x,
+  signif = NULL,
+  mar = c(6, 6, 4, 1),
+  scalefun = sqrt,
+  zlim = NULL,
+  cols = (grDevices::colorRampPalette(c("white", "yellow", "orange", "red",
+    "darkred")))(100),
+  text = FALSE,
+  cex.text = 1,
+  digits = 2,
+  axes = TRUE,
+  las.axis = 1,
+  cex.axis = 1,
+  cex.axis.X = NULL,
+  cex.axis.Y = NULL,
+  axis.top = FALSE,
+  etext = NULL,
+  etextgap = 0.25,
+  cex.etext = 1,
+  userect = FALSE,
+  rectdelta = c(0.8, 0.8),
+  signiffade = "55",
+  imageback = "white",
+  tol = 1e-10,
+  main = "",
+  xlab = "",
+  ylab = "",
+  ...
+)
 }
 \arguments{
 \item{x}{The matrix object to be drawn}
