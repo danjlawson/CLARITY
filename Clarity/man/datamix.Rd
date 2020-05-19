@@ -4,7 +4,9 @@
 \name{datamix}
 \alias{datamix}
 \title{Simulated Similarity dataset with modified topology for use in Clarity}
-\format{A non-negative similarity matrix of dimension 100 by 100}
+\format{
+A non-negative similarity matrix of dimension 100 by 100
+}
 \source{
 Uses Package \code{\link[ClaritySim]{ClaritySim}}
 }

@@ -168,7 +168,7 @@ c_crossvalidate=function(datalist,kmax=NULL,...){
         kmax=dim(d[[1]])[[1]]-1
     }
     scoremat=sapply(datalist,function(d){
-        cp=Clarity_Scan(d[[1]],v=F,kmax=kmax,...)
+        cp=Clarity_Scan(d[[1]],verbose=FALSE,kmax=kmax,...)
         scores=sapply(1:length(cp$scan),
                       function(i)sum((cp$scan[[i]]$prediction-d[[2]])^2))
         scores

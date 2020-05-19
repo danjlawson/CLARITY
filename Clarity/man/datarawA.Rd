@@ -4,7 +4,9 @@
 \name{datarawA}
 \alias{datarawA}
 \title{Simulated Similarity dataset for use in Clarity}
-\format{A non-negative mixture matrix of dimension 100 by 10}
+\format{
+A non-negative mixture matrix of dimension 100 by 10
+}
 \source{
 Uses Package \code{\link[ClaritySim]{ClaritySim}}
 }

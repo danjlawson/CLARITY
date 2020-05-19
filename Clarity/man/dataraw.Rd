@@ -4,7 +4,9 @@
 \name{dataraw}
 \alias{dataraw}
 \title{Simulated Similarity dataset for use in Clarity}
-\format{A non-negative similarity matrix of dimension 100 by 100}
+\format{
+A non-negative similarity matrix of dimension 100 by 100
+}
 \source{
 Uses Package \code{\link[ClaritySim]{ClaritySim}}
 }

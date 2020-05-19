@@ -13,14 +13,11 @@ Clarity offers tools to rapidly perform the graph comparison, to identify nodes 
 
 ## Installation
 
-Installation should be straightforward with the "devtools" package, which can be installed with `install.packages("devtools")`. Then you can simply call:
+Installation should be straightforward:
 
 ```R
-library("devtools")
-install_github("danjlawson/CLARITY/Clarity")
+remotes::install_github("danjlawson/CLARITY/Clarity")
 ```
-
-If you would prefer to get the [Clarity tar file](https://github.com/danjlawson/CLARITY/Clarity.tar.gz) you can then install that from a terminal with `R CMD INSTALL Clarity.tar.gz`.
 
 ## Usage
 
@@ -28,7 +25,19 @@ You should find usage straightforward if you follow the examples in the Clarity 
 ```R
 help(Clarity)
 ```
-will point you towards
+will point you towards the inline help. The simple usage example is:
+```R
+## Run the model on your similarity matrix, here the example "dataraw"
+scan=Clarity_Scan(dataraw)
+## Predict a new similarity matrix, here the example "datamix"
+predmix=Clarity_Predict(datamix,scan)
+## Plot using the plot.Clarity method:
+plot(predmix)
+```
+
+## Additional information
+
+The file <makeclarity.R> provides the code that generated the example datasets.
 
 ## Citation
 
