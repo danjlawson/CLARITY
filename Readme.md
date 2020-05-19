@@ -37,7 +37,7 @@ plot(predmix)
 
 ## Additional information
 
-The file <makeclarity.R> provides the code that generated the example datasets.
+The file [makeclarity.R](makeclarity.R) provides the code that generated the example datasets.
 
 ## Citation
 
