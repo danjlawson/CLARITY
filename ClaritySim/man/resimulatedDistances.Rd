@@ -30,7 +30,7 @@ See \code{c_dist} in package \code{Clarity} which implements a simpler solution 
 set.seed(1)
 mysim=simulateCoalescent(36,36,L=200,
                          alpha=rep(0,36),sigma0=0.1)
-mysim2a<-simulationToDistance(mysim,nrep=500)
+mysim2a<-resimulatedDistances(mysim,nrep=500)
 mycols=matrix(1,nrow=dim(mysim$Y)[1],ncol=dim(mysim$Y)[2])
 diag(mycols)=2
 
