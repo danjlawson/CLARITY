@@ -25,7 +25,7 @@
 c_updateX_solve<-function(A,Y){
     tAAinv=try(
         solve(t(A)%*% A),silent=TRUE)
-    if(class(tAAinv)=="try-error") return(tAAinv)
+    if(is(tAAinv,"try-error")) return(tAAinv)
     Xsol=tAAinv %*% t(A) %*% Y %*% A %*% tAAinv
     Xsol
 }
@@ -56,7 +56,7 @@ c_updateX_solve<-function(A,Y){
 c_Robust_updateX_solve <- function(A,Y){
     ## Robustly find a solution for X in Y =A X t(A), falling back to the generalised inverse if needed
     Xsol=try(c_updateX_solve(A,Y),silent=TRUE)
-    if(class(Xsol)=="try-error"){
+    if(is(Xsol,"try-error")){
         tAAinv = try(MASS::ginv(t(A) %*% A), silent = TRUE)
         Xsol = tAAinv %*% t(A) %*% Y %*% A %*% tAAinv
     }
@@ -134,7 +134,7 @@ c_objectivefunction=function(A,X,Y){
 #' @export
 #' 
 c_listscore=function(clist){
-    if(class(clist)!="ClarityScan") stop("clist must be of class ClarityScan as returned by Clarity_Scan")
+    if(!is(clist,"ClarityScan")) stop("clist must be of class ClarityScan as returned by Clarity_Scan")
     sapply(clist$scan,function(x)c_objectivefunction(x$A,x$X,x$Y))
 }
 
@@ -223,7 +223,7 @@ Clarity_fixedK <- function(Y,k,method="SVDX",verbose=TRUE,...){
 #' scanmixfromraw=Clarity_Predict(datamix,clist=scanraw) 
 #' }
 Clarity_Predict<-function(Ynew,clist,Ysvd=NULL) {
-    if(class(clist)=="ClarityScan") {
+    if(is(clist,"ClarityScan")) {
         if(is.null(Ysvd)) Ysvd=c_svd(Ynew)
         ret=list()
         ret$scan=lapply(clist$scan,Clarity_Predict,Ynew=Ynew,Ysvd=Ysvd)
@@ -234,7 +234,7 @@ Clarity_Predict<-function(Ynew,clist,Ysvd=NULL) {
         ret$kmax=clist$kmax
         class(ret)="ClarityScan"
         return(ret)
-    }else if(class(clist)=="Clarity"){
+    }else if(is(clist,"Clarity")){
         ret=clist
         if(!is.null(Ysvd)) ret$Ysvd=Ysvd # Only for book keeping, we don't need it
         ret$X=c_Robust_updateX_solve(ret$A,Ynew)
@@ -340,7 +340,7 @@ Clarity_Extend <- function(clist,kmax=10,
 #' ## Core persistence plot 
 #' plot(predmix)
 #' ## Bootstrap based on arbitrary resampling scheme
-#' comparemix=Clarity_Compare(scan,target=datamix,D=dataraw)
+#' comparemix=Clarity_Compare(scan,D=dataraw,Dnew=datamix)
 #' ## Core persistence plot including uncertainty
 #' plot(comparemix)
 #' }

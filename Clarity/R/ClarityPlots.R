@@ -20,6 +20,8 @@
 #' @param cex.axis (default=1) \code{\link{par}}(cex) for axis text.
 #' @param cex.axis.X (default=NULL) cex for X axis. Inherits from cex.axis if NULL. Set to 0 to disable X axis.
 #' @param cex.axis.Y (default=NULL) cex for Y axis. Inherits from cex.axis if NULL. Set to 0 to disable Y axis.
+#' @param col.axis.X (default=NULL) color for X axis. If provided, it will be passted to \code{\link{mtext}}.
+#' @param col.axis.Y (default=NULL) color for Y axis. If provided, it will be passted to \code{\link{mtext}}.
 #' @param axis.top (default=FALSE) whether to draw the X axis at the top, rather than the bottom, of the image.
 #' @param etext (default=NULL) an optional matrix of additional text to be drawn in each cell underneath the main text.
 #' @param etextgap (default=0.25) distance below the center of each rectangle to place the etext content.
@@ -72,7 +74,10 @@ Clarity_Chart<-function(x,
                         axes=TRUE,
                         las.axis=1,
                         cex.axis=1,
-                        cex.axis.X=NULL,cex.axis.Y=NULL,
+                        cex.axis.X=NULL,
+                        cex.axis.Y=NULL,
+                        col.axis.X=NULL,
+                        col.axis.Y=NULL,
                         axis.top=FALSE,
                         etext=NULL,
                         etextgap=0.25,
@@ -87,12 +92,12 @@ Clarity_Chart<-function(x,
     if(!any(is.null(mar))) graphics::par(mar=mar)
     if(length(rectdelta)==1)rectdelta=rep(rectdelta,2)
     if(is.null(zlim)) zlim=range(stats::na.omit(as.numeric(scalefun(x))))
-    if(class(zlim)=="character" && zlim=="symmetric"){
+    if(is(zlim,"character") && zlim=="symmetric"){
         zlim=max(abs(stats::na.omit(as.numeric(scalefun(x)))))
         zlim=c(-zlim,zlim)
     }
     if(any(!is.null(signif))) {
-        if(class(signif)=="numeric"){
+        if(is(signif,"numeric")){
             signif=matrix(TRUE,nrow=dim(x)[1],ncol=dim(x)[2])
         }
         userect=TRUE
@@ -134,14 +139,31 @@ Clarity_Chart<-function(x,
         if(is.null(cex.axis.Y))cex.axis.Y=cex.axis
         if(cex.axis.X>0){
             if(axis.top){taxis=3}else{taxis=1}
-            graphics::axis(taxis,at=1:dim(x)[1],
-                           labels=rownames(x),las=las.axis,
-                           cex.axis=cex.axis.X)
+            if(all(is.null(col.axis.X))){
+                graphics::axis(taxis,at=1:dim(x)[1],
+                               labels=rownames(x),las=las.axis,
+                               cex.axis=cex.axis.X)
+            }else{
+                graphics::axis(taxis,at=1:dim(x)[1],labels=FALSE)
+                graphics::mtext(side=taxis,at=1:dim(x)[1],
+                                line=1,las=las.axis,
+                                text=rownames(x),las=las.axis,
+                                cex.axis=cex.axis.X,col=col.axis.X)
+            }
         }
         if(cex.axis.Y>0){
-            graphics::axis(2,at=1:dim(x)[2],
-                           labels=colnames(x),las=las.axis,
-                           cex.axis=cex.axis.Y)
+            if(all(is.null(col.axis.Y))){
+                graphics::axis(2,at=1:dim(x)[2],
+                               labels=colnames(x),las=las.axis,
+                               cex.axis=cex.axis.Y)
+            }else {
+                graphics::axis(2,at=1:dim(x)[2],labels=FALSE)
+                graphics::mtext(side=2,at=1:dim(x)[2],
+                                line=1,las=las.axis,
+                                text=colnames(x),las=las.axis,
+                                cex.axis=cex.axis.Y,
+                                col=col.axis.Y)
+            }
         }
     }
     if(text){
@@ -151,7 +173,7 @@ Clarity_Chart<-function(x,
                  cex=cex.text)
         }
     }
-    if(!is.null(etext)) if(class(etext)=="matrix") if(all(dim(etext)==dim(x)))
+    if(!is.null(etext)) if(is(etext,"matrix")) if(all(dim(etext)==dim(x)))
     {
         for(i in 1:dim(x)[1]) {
             text(i,1:dim(x)[2]-etextgap,etext[i,],cex=cex.etext)
@@ -218,9 +240,9 @@ plot.Clarity=function(x,
                       verbose=FALSE,
                       ...){
     if(!any(is.null(signif))) {
-        if(class(signif)=="matrix"){
+        if(is(signif,"matrix")){
             if(is.null(thresh)) thresh=0.05/dim(signif)[1]/dim(signif)[2]
-            if(class(signif[1,1])=="numeric") {
+            if(is(signif[1,1],"numeric")) {
                 if(verbose)print(paste("Applying significance threshold",thresh))
                 signif=signif<thresh
          }else if(verbose)print("Provided with significance matrix")
@@ -320,9 +342,9 @@ plot.ClarityScan=function(x,
                           verbose=FALSE,
                           ...){
     if(!any(is.null(signif))) {
-        if(class(signif)=="matrix"){
+        if(is(signif,"matrix")){
             if(is.null(thresh)) thresh=0.05/dim(signif)[1]/dim(signif)[2]
-         if(class(signif[1,1])=="numeric") {
+         if(is(signif[1,1],"numeric")) {
                 if(verbose)print(paste("Applying significance threshold",thresh))
                 signif=signif<thresh
          }else if(verbose)print("Provided with significance matrix")
@@ -600,7 +622,7 @@ Clarity_ObjectivePlot <-function(clist,add=FALSE,
                                  main="",
                                  extern=TRUE,
                                  ...){
-    if(class(clist)%in%c("ClarityScan","ClarityScanExtend")) {
+    if(any(class(clist)%in%c("ClarityScan","ClarityScanExtend"))) {
         if(extern){
             print("Warning: called Clarity_ObjectivePlot on a ClarityScan object. Expected a list of ClarityScan objects with names. Will proceed with the name 'scan'.");
             clist=list("scan"=clist)
@@ -621,8 +643,8 @@ Clarity_ObjectivePlot <-function(clist,add=FALSE,
             return(ret)
         }
     }
-    if(class(clist)=="list"){
-        if(class(clist[[1]])%in%c("ClarityScan","ClarityScanExtend")){
+    if(is(clist,"list")){
+        if(any(class(clist[[1]])%in%c("ClarityScan","ClarityScanExtend"))){
             if(is.null(xlim)) xlim=range(sapply(clist,function(x)x$klist))
             if(is.null(ylim)) ylim=range(sapply(clist,function(x)x$objectives))
             if(is.null(name) && !is.null(names(clist))) name=names(clist)
@@ -643,7 +665,7 @@ Clarity_ObjectivePlot <-function(clist,add=FALSE,
                 }
             }
         }else stop("Unrecognised structure for clist")
-        if(class(legendloc)=="character")
+        if(is(legendloc,"character"))
             graphics::legend(legendloc,legend=sapply(ret,function(x)x$name),
                lty=sapply(ret,function(x)x$lty),
                col=sapply(ret,function(x)x$col),

@@ -46,7 +46,7 @@ You can either provide a list of replicated similarity matrices, or some feature
 Each replicated similarity matrix is predicted by the model and summarised appropriately for comparison to data. Uses \code{\link{Clarity_Persistence}} for Persistences and \code{\link{Clarity_Predict}} directly for Residuals.
 }
 \examples{
-\donttest{
+\dontrun{
 scan=Clarity_Scan(dataraw) ## Core Clarity
 predmix=Clarity_Predict(datamix,scan)
 ## Simple feature-based bootstrap for persistences

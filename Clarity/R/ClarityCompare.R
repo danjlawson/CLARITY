@@ -24,13 +24,12 @@
 #' e6=Clarity_Extract(scan,"Rsq") # Get a list containing the R squared matrix for each k
 #' }
 #' @export
-#' 
 Clarity_Extract=function(cscan,what="Yresid",summary=abs,diag=0,k=NULL){
-    if(class(cscan)=="Clarity") {
+    if(is(cscan,"Clarity")) {
         if(what=="Rsq") {
             ret=cscan[["Yresid"]]^2
         }else ret=summary(cscan[[what]])
-    }else if(class(cscan)=="ClarityScan"){
+    }else if(is(cscan,"ClarityScan")){
         if(is.numeric(what)) return(cscan$scan[[what]])
         if(!is.null(k)) {
             if(what=="Rsq") {
@@ -42,8 +41,8 @@ Clarity_Extract=function(cscan,what="Yresid",summary=abs,diag=0,k=NULL){
             ret=lapply(cscan$scan,function(x) Clarity_Extract(x,what,summary,diag,k))
         }
     }else stop(paste("Invalid class",class(cscan),"for cscan in Clarity_Extract"))
-    if((class(ret)=="matrix") && (!is.null(diag))) diag(ret)=diag
-    if((class(ret)=="list") && (!is.null(diag))) ret=lapply(ret,function(x){diag(x)=diag;x})
+    if((is(ret,"matrix")) && (!is.null(diag))) diag(ret)=diag
+    if((is(ret,"list")) && (!is.null(diag))) ret=lapply(ret,function(x){diag(x)=diag;x})
     return(ret)
 }
 ############################################
@@ -74,8 +73,8 @@ Clarity_Extract=function(cscan,what="Yresid",summary=abs,diag=0,k=NULL){
 #' @seealso \code{\link{Clarity_Extract}}
 #' @export
 Clarity_Persistence=function(clist,f="RowSumsSquared",what="Yresid"){
-    if(class(clist)=="ClarityScan") return(Clarity_Persistence(Clarity_Extract(clist,what)))
-    if(class(f)=="character") {
+    if(is(clist,"ClarityScan")) return(Clarity_Persistence(Clarity_Extract(clist,what)))
+    if(is(f,"character")) {
         if(f=="Frobenius") {
             f=function(x)sum(x^2)
         }else if(f=="RowSumsSquared"){
@@ -84,7 +83,7 @@ Clarity_Persistence=function(clist,f="RowSumsSquared",what="Yresid"){
             stop(paste("Unrecognised function:",f))
         }
     }
-    if(class(f)!="function") stop("Invalid function in Clarity_Persistence")
+    if(!is(f,"function")) stop("Invalid function in Clarity_Persistence")
     sapply(clist,f)
 }
 
@@ -104,7 +103,7 @@ Clarity_Persistence=function(clist,f="RowSumsSquared",what="Yresid"){
 #' 
 c_fixdiagonals=function (x,method="detect"){
     if(dim(x)[1]!=dim(x)[2]) stop("Error: c_fixdiagonals requires a square matrix.")
-    if(class(method)!="function"){
+    if(!is(method,"function")){
         test=sapply(1:dim(x)[1],function(i){
             c(x[i,i],mean(c(x[i,-i],x[-i,i])))
         })
@@ -262,21 +261,21 @@ Clarity_Compare <- function(clearned,
             stop(paste("Error: Invalid H0 :",H0))
         }
     }else{
-        if(class(transform)!="function") stop("Error: transform must be a function that accepts two variables, the initial and the target for transformation. See help(\"ClarityCompare\".")
+        if(!is(transform,"function")) stop("Error: transform must be a function that accepts two variables, the initial and the target for transformation. See help(\"ClarityCompare\".")
         if(verbose) cat("Using custom H0 with provided transform\n")
     }
 
 ### Check data type
-    if(!is.null(k) && class(clearned)=="ClarityScan"){
+    if(!is.null(k) && is(clearned,"ClarityScan")){
         clearned=clearned$scan[[k]]
         if(verbose) cat(paste0("Extracting Clarity object at requested k=",k," into clearned.\n"))
     }
     
-    if(class(clearned)=="ClarityScan"){
+    if(is(clearned,"ClarityScan")){
         if(verbose) cat("Working with Persistences as provided with a ClarityScan object in clearned.\n")
         kmax=clearned$kmax
         k=NULL
-    }else if (class(clearned)=="Clarity"){
+    }else if (is(clearned,"Clarity")){
         k=clearned$k
         kmax=NULL
         if(verbose) cat(paste0("Working with Residuals as provided with a Clarity object at k=",k,"in clearned.\n"))
@@ -339,9 +338,9 @@ Clarity_Compare <- function(clearned,
         cv=c_crossvalidate(Ylist)
         if(verbose) cat("Computing pvalues from resampling procedure.\n")
         pvals=c_Scoresplit(csplitlist)
-        if(class(pred)=="Clarity"){
+        if(is(pred,"Clarity")){
             rownames(pvals)=colnames(pvals)=rownames(pred$Y)
-        }else if(class(pred)=="ClarityScan"){
+        }else if(is(pred,"ClarityScan")){
             rownames(pvals)=rownames(pred$Y)
         }
         ret=list(
@@ -357,7 +356,7 @@ Clarity_Compare <- function(clearned,
             distfn=distfn,
             k=k
         )
-        if(class(clearned)=="Clarity") class(ret)="ClaritySignificance"
+        if(is(clearned,"Clarity")) class(ret)="ClaritySignificance"
         if(class(clearned)=="ClarityScan") class(ret)="ClarityScanSignificance"
     }else{
         ret=pred

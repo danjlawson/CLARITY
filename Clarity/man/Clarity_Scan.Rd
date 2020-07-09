@@ -49,7 +49,7 @@ predmix=Clarity_Predict(datamix,scan) ## Core prediction
 ## Core persistence plot 
 plot(predmix)
 ## Bootstrap based on arbitrary resampling scheme
-comparemix=Clarity_Compare(scan,target=datamix,D=dataraw)
+comparemix=Clarity_Compare(scan,D=dataraw,Dnew=datamix)
 ## Core persistence plot including uncertainty
 plot(comparemix)
 }

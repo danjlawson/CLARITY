@@ -20,6 +20,8 @@ Clarity_Chart(
   cex.axis = 1,
   cex.axis.X = NULL,
   cex.axis.Y = NULL,
+  col.axis.X = NULL,
+  col.axis.Y = NULL,
   axis.top = FALSE,
   etext = NULL,
   etextgap = 0.25,
@@ -63,6 +65,10 @@ Clarity_Chart(
 \item{cex.axis.X}{(default=NULL) cex for X axis. Inherits from cex.axis if NULL. Set to 0 to disable X axis.}
 
 \item{cex.axis.Y}{(default=NULL) cex for Y axis. Inherits from cex.axis if NULL. Set to 0 to disable Y axis.}
+
+\item{col.axis.X}{(default=NULL) color for X axis. If provided, it will be passted to \code{\link{mtext}}.}
+
+\item{col.axis.Y}{(default=NULL) color for Y axis. If provided, it will be passted to \code{\link{mtext}}.}
 
 \item{axis.top}{(default=FALSE) whether to draw the X axis at the top, rather than the bottom, of the image.}
 

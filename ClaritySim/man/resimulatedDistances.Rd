@@ -26,7 +26,7 @@ Computes the euclidean distance between all points by replicating the data x to 
 See \code{c_dist} in package \code{Clarity} which implements a simpler solution to the diagonal.
 }
 \examples{
-\donttest{
+\dontrun{
 set.seed(1)
 mysim=simulateCoalescent(36,36,L=200,
                          alpha=rep(0,36),sigma0=0.1)

@@ -4,12 +4,14 @@
 \alias{c_Procrust}
 \title{Perform a Procrustes transformation of one matrix into another}
 \usage{
-c_Procrust(Ystart, Ytarget)
+c_Procrust(Ystart, Ytarget, positive = TRUE)
 }
 \arguments{
 \item{Ystart}{the matrix to transform}
 
 \item{Ytarget}{The target matrix}
+
+\item{positive}{(default=TRUE) whether to force any negative components to zero. This is the correct default for similarities, but not for other uses.}
 }
 \value{
 A matrix which is the best fitting transformation of Ystart to Ytarget

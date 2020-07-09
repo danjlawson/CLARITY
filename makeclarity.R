@@ -8,11 +8,14 @@ setwd("ClaritySim")
 document()
 check()
 
+
 ## Document and check Clarity
 setwd("~/code/Clarity")
 setwd("Clarity")
 document()
 check()
+
+## TO FIX c_Bootstrap example
 
 ## Install both packages
 setwd("~/code/Clarity")

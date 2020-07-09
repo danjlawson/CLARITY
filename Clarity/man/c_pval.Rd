@@ -22,35 +22,6 @@ For each element in an observed matrix, extract out the corresponding elements i
 
 Also note that for normal use you might just want to use \code{\link{plot.Clarity}} or \code{\link{plot.ClarityScan}}, both of which use this function for you.
 }
-\examples{
-\donttest{
-scan=Clarity_Scan(dataraw) ## Core Clarity
-predmix=Clarity_Predict(datamix,scan) ## Core prediction
-
-## Bootstrap persistences:
-scanbootstrap=c_Bootstrap(scan,target=datamix,D=datarawD)
-## Extract observed persistences
-P=Clarity_Persistence(predmix)
-## Compute pvalues
-pvals=c_pval(scanbootstrap,P)
-## pvals is a matrix of dimension N by K
-signif=pvals<0.01
-## signif is a logical matrix of dimension N by K
-
-## Similarly for residuals:
-## Bootstrap residuals
-k10bootstrap=c_Bootstrap(Clarity_Extract(scan,10),
-                               target=datamix,
-                               D=datarawD)
-## Extract observed residuals
-k10residuals=Clarity_Extract(predmix,k=10)
-## Compute Pvals
-residualpvals=c_pval(k10bootstrap,k10residuals,
-                        population="bestcol")
-residualsignif=residualpvals<0.01
-
-}
-}
 \seealso{
 \code{\link{c_Bootstrap}} for making bootstraps. For plotting, \code{\link{plot.Clarity}} or \code{\link{plot.ClarityScan}} call this function for you.  \code{\link{Clarity_Persistence}} for extracting persistence or  \code{\link{Clarity_Extract}} to extract residuals.
 }

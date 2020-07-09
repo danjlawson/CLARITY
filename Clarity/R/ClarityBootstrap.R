@@ -21,7 +21,7 @@
 #' @return A list of length nbs, each containing a matrix
 #' @seealso \code{\link{Clarity_Scan}} to run Clarity, \code{\link{Clarity_Extract}} to extract residuals and persistences, \code{\link{plot.ClarityScan}} and \code{\link{plot.Clarity}} for plotting.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' scan=Clarity_Scan(dataraw) ## Core Clarity
 #' predmix=Clarity_Predict(datamix,scan)
 #' ## Simple feature-based bootstrap for persistences
@@ -224,34 +224,6 @@ c_CompareNormal=function(x,o){
 #' 
 #' @return A matrix of the same shape as obs, containing the result of comparison applied to each element
 #' @seealso \code{\link{c_Bootstrap}} for making bootstraps. For plotting, \code{\link{plot.Clarity}} or \code{\link{plot.ClarityScan}} call this function for you.  \code{\link{Clarity_Persistence}} for extracting persistence or  \code{\link{Clarity_Extract}} to extract residuals.
-#' @examples
-#' \donttest{
-#' scan=Clarity_Scan(dataraw) ## Core Clarity
-#' predmix=Clarity_Predict(datamix,scan) ## Core prediction
-#' 
-#' ## Bootstrap persistences:
-#' scanbootstrap=c_Bootstrap(scan,target=datamix,D=datarawD)
-#' ## Extract observed persistences
-#' P=Clarity_Persistence(predmix)
-#' ## Compute pvalues
-#' pvals=c_pval(scanbootstrap,P)
-#' ## pvals is a matrix of dimension N by K
-#' signif=pvals<0.01
-#' ## signif is a logical matrix of dimension N by K
-#' 
-#' ## Similarly for residuals:
-#' ## Bootstrap residuals
-#' k10bootstrap=c_Bootstrap(Clarity_Extract(scan,10),
-#'                                target=datamix,
-#'                                D=datarawD)
-#' ## Extract observed residuals
-#' k10residuals=Clarity_Extract(predmix,k=10)
-#' ## Compute Pvals
-#' residualpvals=c_pval(k10bootstrap,k10residuals,
-#'                         population="bestcol")
-#' residualsignif=residualpvals<0.01
-#'
-#' }
 #' @export
 c_pval=function(testbs,obs,
                 comparison=c_CompareNormal ) {

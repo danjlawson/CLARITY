@@ -7,10 +7,12 @@
 #' Procrust the matrix provided in the first argument, into the target provided in the second.  Performs Translation and Dilation.
 #' @param Ystart the matrix to transform
 #' @param Ytarget The target matrix
+#' @param positive (default=TRUE) whether to force any negative components to zero. This is the correct default for similarities, but not for other uses.
 #' @return A matrix which is the best fitting transformation of Ystart to Ytarget
 #' @export
 #' @seealso \code{\link{c_Bootstrap}}, which uses this code.
-c_Procrust=function(Ystart,Ytarget){
+c_Procrust<- function (Ystart, Ytarget,positive=TRUE) 
+{
     if (nrow(Ytarget) != nrow(Ystart)) {
         stop("Dimensions differ between Ystart and Ytarget")
     }
@@ -19,14 +21,11 @@ c_Procrust=function(Ystart,Ytarget){
     }
     n <- nrow(Ystart)
     m <- ncol(Ystart)
-    ## Translation
     J <- diag(n) - 1/n * matrix(1, n, n)
-    ## 
     C <- t(Ytarget) %*% J %*% Ystart
     svd.out <- svd(C)
     R <- svd.out$v %*% t(svd.out$u)
     s <- 1
-    ## Dilation
     mat1 <- t(Ytarget) %*% J %*% Ystart %*% R
     mat2 <- t(Ystart) %*% J %*% Ystart
     s.numer <- 0
@@ -36,13 +35,11 @@ c_Procrust=function(Ystart,Ytarget){
         s.denom <- s.denom + mat2[i, i]
     }
     s <- s.numer/s.denom
-    ## 
     tt <- matrix(0, m, 1)
-    ## Translation
     tt <- 1/n * t(Ytarget - s * Ystart %*% R) %*% matrix(1, n, 1)
-    ret=s *Ystart %*% R + matrix(tt, n, m, byrow = TRUE)
-    ret[ret<0]=0
-    colnames(ret)=colnames(Ystart)
+    ret = s * Ystart %*% R + matrix(tt, n, m, byrow = TRUE)
+    if(positive) ret[ret < 0] = 0
+    colnames(ret) = colnames(Ystart)
     ret
 }
 

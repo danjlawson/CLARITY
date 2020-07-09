@@ -33,7 +33,7 @@ claritysim_dist=function (x){
 #' @return A ClaritySim object with an updated Y
 #' @seealso \code{\link{claritysim_dist}}, which does it the fast way as recommended in Clarity.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' set.seed(1)
 #' mysim=simulateCoalescent(36,36,L=200,
 #'                          alpha=rep(0,36),sigma0=0.1)

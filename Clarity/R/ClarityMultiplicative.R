@@ -127,7 +127,7 @@ c_updateA<-function(A,X,Y,fixed=NULL,norm=TRUE) {
 #' 
 c_updateX<-function(A,X,Y){
     Xsol=try(c_updateX_solve(A,Y),silent=TRUE)
-    if(class(Xsol)=="try-error"){
+    if(is(Xsol,"try-error")){
         tAA=(t(A) %*% A) 
         num = t(A) %*% (Y) %*% A
         denom = tAA %*% X %*% tAA
@@ -424,7 +424,7 @@ c_DecreaseK<-function(Y,A,X){
 c_ForwardStep<-function(clist,verbose=TRUE,tmax=10000,matrixdistmin=NULL,objectivedistmin=NULL,alpha=0.9,dirichletbeta=1,...){
     ## Update states at K+1 using the state at K, and choose the best one to retain
     ## Report the new updated list
-    if(class(clist)!="ClarityScan") stop("clist must be of class ClarityScan as returned by Clarity_Scan")
+    if(!is(clist,"ClarityScan")) stop("clist must be of class ClarityScan as returned by Clarity_Scan")
     scan=clist$scan
     if(is.null(matrixdistmin))matrixdistmin=scan[[1]]$matrixdistmin
     if(is.null(objectivedistmin))objectivedistmin=scan[[1]]$objectivedistmin
@@ -486,7 +486,7 @@ c_ForwardStep<-function(clist,verbose=TRUE,tmax=10000,matrixdistmin=NULL,objecti
 c_BackwardStep<-function(clist,verbose=TRUE,tmax=10000,matrixdistmin=NULL,objectivedistmin=NULL,...){
     ## Update states at K-1 using the state at K, and choose the best one to retain
     ## Report the new updated list
-    if(class(clist)!="ClarityScan") stop("clist must be of class ClarityScan as returned by Clarity_Scan")
+    if(!is(clist,"ClarityScan")) stop("clist must be of class ClarityScan as returned by Clarity_Scan")
     if(is.null(matrixdistmin))matrixdistmin=clist$scan[[1]]$matrixdistmin
     if(is.null(objectivedistmin))objectivedistmin=clist$scan[[1]]$objectivedistmin
     scan=clist$scan
@@ -548,7 +548,7 @@ c_BackwardStep<-function(clist,verbose=TRUE,tmax=10000,matrixdistmin=NULL,object
 #' 
 c_ForwardBackward<-function(clist,niter=10,thresh=-1,tmax=10000,verbose=TRUE,matrixdistmin=1e-8,objectivedistmin=0.001,...){
     ## Runs backwards and forwards through the results using neighbouring runs to improve one-another. Does this niter times in both directions. Returns the optimised clist
-    if(class(clist)!="ClarityScan") stop("clist must be of class ClarityScan as returned by Clarity_Scan")
+    if(!is(clist,"ClarityScan")) stop("clist must be of class ClarityScan as returned by Clarity_Scan")
     converged=FALSE
     for(i in 1:niter){
         if(verbose) print(paste("Iteration",i))
@@ -636,7 +636,7 @@ Clarity_Multiplicative_Scan<-function(Y,
                                verbose=verbose,
                                ...)        
     }else{
-        if(class(clist)!="ClarityScan") stop("clist must be of class ClarityScan as returned by Clarity_Scan")
+        if(!is(clist,"ClarityScan")) stop("clist must be of class ClarityScan as returned by Clarity_Scan")
         kmax=clist$kmax
         if(verbose){
             print(paste0("Using provided clist which uses kmax=",kmax,". "))

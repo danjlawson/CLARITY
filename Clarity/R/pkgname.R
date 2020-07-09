@@ -10,5 +10,6 @@
 #' The code for Clarity and ClarityScan is hosted at \url{https://github.com/danjlawson/CLARITY}, where you can also find the code that generated the figures in the paper.
 #' 
 #' @references To follow
+#' @importFrom methods is
 "_PACKAGE"
 #> [1] "_PACKAGE"
