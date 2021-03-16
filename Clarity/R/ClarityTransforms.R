@@ -62,7 +62,10 @@ c_MeanScale=function(Ystart,Ytarget){
     if (ncol(Ytarget) != ncol(Ystart)) {
         stop("Dimensions differ between Ystart and Ytarget")
     }
-    Ystart*mean(Ytarget)/mean(Ystart)
+    tmp=Ystart-mean(Ystart)
+    tmp=tmp*sd(Ytarget)/sd(Ystart)
+    tmp=tmp+mean(Ytarget)
+    tmp
 }
 
 ###############################

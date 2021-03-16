@@ -250,13 +250,13 @@ Clarity_Compare <- function(clearned,
     if(is.null(transform)){
         if(H0=="structure") {
             transform=c_Procrust
-            if(verbose) cat("Using H0=structure, transform=Clarity_Procrust\n")
+            if(verbose) cat("Using H0=structure, transform=c_Procrust\n")
         }else if(H0=="scale"){
             transform=c_MeanScale
-            if(verbose) cat("Using H0=structure, transform=Clarity_Procrust\n")
+            if(verbose) cat("Using H0=scale, transform=c_MeanScale\n")
         }else if(H0=="value"){
             transform=c_Identity
-            if(verbose) cat("Using H0=structure, transform=Clarity_Procrust\n")
+            if(verbose) cat("Using H0=value, transform=c_Identity\n")
         }else{
             stop(paste("Error: Invalid H0 :",H0))
         }
