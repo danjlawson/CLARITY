@@ -42,7 +42,7 @@ Several methods are available:
 }
 }
 \examples{
-\donttest{
+\dontrun{
 scan=Clarity_Scan(dataraw) # SVD method model fit
 ## Onward analysis:
 predmix=Clarity_Predict(datamix,scan) ## Core prediction

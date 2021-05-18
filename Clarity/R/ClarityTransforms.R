@@ -1,4 +1,55 @@
-
+###############################
+#' @title Get a centering matrix of specified dimension 
+#'
+#' @description
+#' Gets a centering matrix Cn so that Cn %*% Y is centered.
+#' @param n either the dimension of Y, or Y itself.
+#' @return A matrix with same dimensions as Y, centered.
+#' @export
+c_getC=function(n){ # The centering matrix from
+    if(is(n,"matrix")) n=dim(n)[1]
+    diag(n) - (1/n)*matrix(1,nrow=n,ncol=n)
+}
+###############################
+#' @title (Double) Center a matrix
+#'
+#' @description
+#' Centers a matrix by rows and/or columns, nominally computing 'Cn %*% Y %*% Cm' for an n by m matrix Y
+#'
+#' @param Y the matrix to be centered
+#' @param col (default: TRUE) Whether to center the columns to ensure they have mean zero
+#' @param row (default: TRUE) Whether to center the rows to ensure they have mean zero
+#' @param method Either "mean" (Default) or "matrix"; Whether to center with the theoretically nice centering matrix \code{\link{c_getC}} or just subtracting row and column means appropriately, which is quicker, and supports na values.
+#' @param na.rm Whether to remove NA values if method=="mean"
+#' @return A matrix with same dimensions as Y, centered.
+#' @export
+c_Center <- function (Y, col = TRUE, row = TRUE, method = "mean",na.rm=TRUE) 
+{
+    ret = Y
+    if (col) {
+        Cn1 = c_getC(dim(Y)[1])
+        if (method == "matrix") {
+            ret = Cn1 %*% Y
+        }
+        else if (method == "mean") {
+            ret = ret - rowMeans(ret,na.rm=na.rm)
+        }
+        else stop("Invalid method: must be \"matrix\" or \"mean\"")
+    }
+    if (row) {
+        Cn2 = c_getC(dim(Y)[2])
+        if (method == "matrix") {
+            ret = ret %*% Cn2
+        }
+        else if (method == "mean") {
+            ret = t(t(ret) - colMeans(ret,na.rm=na.rm))
+        }
+        else stop("Invalid method: must be \"matrix\" or \"mean\"")
+    }
+    rownames(ret) = rownames(Y)
+    colnames(ret) = colnames(Y)
+    ret
+}
 ###############################
 #' @title Perform a Procrustes transformation of one matrix into another
 #'
@@ -63,7 +114,7 @@ c_MeanScale=function(Ystart,Ytarget){
         stop("Dimensions differ between Ystart and Ytarget")
     }
     tmp=Ystart-mean(Ystart)
-    tmp=tmp*sd(Ytarget)/sd(Ystart)
+    tmp=tmp*stats::sd(Ytarget)/stats::sd(Ystart)
     tmp=tmp+mean(Ytarget)
     tmp
 }

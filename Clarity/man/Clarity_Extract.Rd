@@ -24,7 +24,7 @@ A list containing what for each k in the ClarityScan
 Extract objects such as Clarity objects or residuals from a ClarityScan object. This is useful for constructing Persistences or similar. Also provides a standardized interface to extract the absolute value of residuals.
 }
 \examples{
-\donttest{
+\dontrun{
 scan=Clarity_Scan(dataraw)
 e1=Clarity_Extract(scan) # Get a list containing the absolute residual matrices for each k
 e2=Clarity_Extract(scan,what=5) # get the 5th Clarity object

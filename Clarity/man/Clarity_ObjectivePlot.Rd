@@ -69,7 +69,7 @@ an invisble list of the used plot symbols for each curve
 Makes a plot of (objective function) against (k) for all ClarityScan objects, automatically doing sensible things with color, line type, legend, etc. For most arguments, try passing vectors of length P=number of plots to make.
 }
 \examples{
-\donttest{
+\dontrun{
 scan=Clarity_Scan(dataraw) ## Core Clarity
 predmix=Clarity_Predict(datamix,scan) ## Core prediction
 predrep=Clarity_Predict(datarep,scan) 

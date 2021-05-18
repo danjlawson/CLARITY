@@ -20,7 +20,7 @@ NULL, invisibly. This funciton is used for its side effects in plotting.
 This is a convenience wrapper to \code{\link{Clarity_Chart}} for ClarityPlot objects returned from \code{\link{plot.Clarity}} or \code{\link{plot.ClarityScan}}. It will extract the Persistence P or Squared Residuals R, along with any signif matrix.
 }
 \examples{
-\donttest{
+\dontrun{
 scan=Clarity_Scan(dataraw) ## Core Clarity
 predmix=Clarity_Predict(datamix,scan) ## Core prediction
 pvalmix=Clarity_Compare(scan,D=datarawD,Dnew=datamixD)

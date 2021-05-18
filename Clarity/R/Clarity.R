@@ -170,7 +170,7 @@ c_listscore=function(clist){
 #' @seealso The methods are \code{\link{c_SVD_fixedK}}) for SVD or \code{\link{c_multiplicative_fixedK}} for Multiplicative. \code{\link{Clarity_Scan}} is the recomended interface and gives a high level overview.
 #' @export
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' scansvd=Clarity_fixedK(dataraw,3) # Use the SVD method
 #' scanmult=Clarity_fixedK(dataraw,3,method="M") # Use the Multiplicative method
 #' }
@@ -215,7 +215,7 @@ Clarity_fixedK <- function(Y,k,method="SVDX",verbose=TRUE,...){
 #' @seealso \code{\link{Clarity_Scan}} to generate an estimate for clist to be used here, \code{\link{plot.Clarity}} and \code{\link{plot.ClarityScan}} for plotting.
 #' @export
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' scanraw=Clarity_Scan(dataraw) # Generate an initial run
 #' # Apply it to a new dataset with the same structure
 #' scanrepfromraw=Clarity_Predict(datarep,clist=scanraw) 
@@ -333,7 +333,7 @@ Clarity_Extend <- function(clist,kmax=10,
 #' @seealso  \code{\link{Clarity_fixedK}} for the details of what a "Clarity" object is. \code{\link{Clarity_Predict}} to make an initial prediction of the new data. \code{\link{plot.ClarityScan}} for plotting, \code{\link{Clarity_Compare}} for quantifying uncertainty. \code{\link{Clarity_ObjectivePlot}} for comparing quality of fit as a function of \code{k}.
 #' @export
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' scan=Clarity_Scan(dataraw) # SVD method model fit
 #' ## Onward analysis:
 #' predmix=Clarity_Predict(datamix,scan) ## Core prediction

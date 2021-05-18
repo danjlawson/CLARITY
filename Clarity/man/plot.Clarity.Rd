@@ -61,7 +61,7 @@ Plot a Residuals Chart, which is an image representing which subjects are poorly
 This is the main plot fuction for residuals. It has several convenience manipulations to extract residuals and statistical significance associated with them, as well as summarising them by clustering or mixtures.
 }
 \examples{
-\donttest{
+\dontrun{
 scan=Clarity_Scan(dataraw) ## Core Clarity
 predmix=Clarity_Predict(datamix,scan) ## Core prediction
 ## Resample residuals

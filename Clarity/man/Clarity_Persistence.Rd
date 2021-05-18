@@ -22,7 +22,7 @@ Perform an operation on a list of matrices in order to compute a Persistence Str
 in the notation of Lawson et al 2019 CLARITY paper, where Y is the provided data matrix and \eqn{\hat{Y}^k} is the predicted matrix at complexity k.
 }
 \examples{
-\donttest{
+\dontrun{
 scan=Clarity_Scan(dataraw) ## Core Clarity
 predmix=Clarity_Predict(datamix,scan)
 p=Clarity_Persistence(scan) # extract persistence

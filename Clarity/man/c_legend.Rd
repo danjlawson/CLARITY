@@ -53,7 +53,7 @@ This is a rather ugly, manual hack to add a legend outside of the main image are
 You might want to show this some other way, but this can work with manual tuning of x,y, and size in image units.
 }
 \examples{
-\donttest{
+\dontrun{
 scan=Clarity_Scan(dataraw) ## Core Clarity
 
 ## Plot persistence chart with p-values

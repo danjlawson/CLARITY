@@ -65,7 +65,7 @@ Plot a Persistence Chart, which is an image representing which subjects are poor
 This is the main plot fuction for persistences. It has several convenience manipulations to extract persistences and statistical significance associated with them, as well as summarising them by clustering or mixtures.
 }
 \examples{
-\donttest{
+\dontrun{
 scan=Clarity_Scan(dataraw) ## Core Clarity
 predmix=Clarity_Predict(datamix,scan) ## Core prediction
 pvalmix=Clarity_Compare(scan,

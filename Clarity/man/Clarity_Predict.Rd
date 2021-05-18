@@ -20,7 +20,7 @@ An object of the same class as clist provided, with updated Y, X and derived fea
 Takes each Clarity object and learns a new X for the new data Ynew provided.
 }
 \examples{
-\donttest{
+\dontrun{
 scanraw=Clarity_Scan(dataraw) # Generate an initial run
 # Apply it to a new dataset with the same structure
 scanrepfromraw=Clarity_Predict(datarep,clist=scanraw) 

@@ -37,7 +37,7 @@ A list of class "Clarity" containing the following:
 Learn a mixture model representation of a provided similarity matrix Y using Clarity. Either uses SVD ( \code{\link{c_SVD_fixedK}}) or Multiplicative method (\code{\link{c_multiplicative_fixedK}}); see \code{\link{Clarity_Scan}} for a high level overview.
 }
 \examples{
-\donttest{
+\dontrun{
 scansvd=Clarity_fixedK(dataraw,3) # Use the SVD method
 scanmult=Clarity_fixedK(dataraw,3,method="M") # Use the Multiplicative method
 }

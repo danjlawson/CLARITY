@@ -105,7 +105,7 @@ Takes a matrix and plots it as an advanced heatmap, including markup for signifi
 NB The recommended interface is  \code{\link{plot.Clarity}} and \code{\link{plot.ClarityScan}}.
 }
 \examples{
-\donttest{
+\dontrun{
 scan=Clarity_Scan(dataraw)
 predmix=Clarity_Predict(datamix,scan)
 scanpred=Clarity_Predict(datamix,scan)

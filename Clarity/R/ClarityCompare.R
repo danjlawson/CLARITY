@@ -14,7 +14,7 @@
 #' @return A list containing what for each k in the ClarityScan
 #' @seealso \code{\link{Clarity_Persistence}} to which you can pass
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' scan=Clarity_Scan(dataraw)
 #' e1=Clarity_Extract(scan) # Get a list containing the absolute residual matrices for each k
 #' e2=Clarity_Extract(scan,what=5) # get the 5th Clarity object
@@ -61,7 +61,7 @@ Clarity_Extract=function(cscan,what="Yresid",summary=abs,diag=0,k=NULL){
 #' 
 #' @return f evaluated at each k, which results in an N by k matrix by default (where N is the number of data items and k is the maximum complexity)
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' scan=Clarity_Scan(dataraw) ## Core Clarity
 #' predmix=Clarity_Predict(datamix,scan)
 #' p=Clarity_Persistence(scan) # extract persistence

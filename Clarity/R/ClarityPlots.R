@@ -40,7 +40,7 @@
 #'
 #' @seealso \code{\link{plot.Clarity}}, \code{\link{plot.ClarityScan}} require much less manual effort to extract various matrices from Clarity and ClarityScan objects. \code{\link{c_legend}} for one way to present a legend.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' scan=Clarity_Scan(dataraw)
 #' predmix=Clarity_Predict(datamix,scan)
 #' scanpred=Clarity_Predict(datamix,scan)
@@ -215,7 +215,7 @@ Clarity_Chart<-function(x,
 #' }
 #' @seealso \code{\link{Clarity_Chart}} which ultimately does the plotting; \code{\link{plot.ClarityPlot}} which is called to perform that plotting; \code{\link{c_MergeSquare}} which is used to perform simplification using the mixture matrix A. \code{\link{c_legend}} for one way to present a legend.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' scan=Clarity_Scan(dataraw) ## Core Clarity
 #' predmix=Clarity_Predict(datamix,scan) ## Core prediction
 #' ## Resample residuals
@@ -313,7 +313,7 @@ plot.Clarity=function(x,
 #' }
 #' @seealso Uses \code{\link{Clarity_Chart}} for plotting. \code{\link{plot.ClarityPlot}} is called to perform that plotting; \code{\link{c_Merge}} which is used to perform simplification using the mixture matrix A. \code{\link{c_legend}} for one way to present a legend. \code{\link{Clarity_ObjectivePlot}} for plotting the objective function.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' scan=Clarity_Scan(dataraw) ## Core Clarity
 #' predmix=Clarity_Predict(datamix,scan) ## Core prediction
 #' pvalmix=Clarity_Compare(scan,
@@ -416,7 +416,7 @@ plot.ClarityScan=function(x,
 #' @seealso \code{\link{Clarity_Chart}} for the actual plotting, \code{\link{plot.Clarity}} for plotting Residuals, and \code{\link{plot.ClarityScan}} for plotting Persistences. \code{\link{c_legend}} for one way to present a legend.
 #' 
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' scan=Clarity_Scan(dataraw) ## Core Clarity
 #' predmix=Clarity_Predict(datamix,scan) ## Core prediction
 #' pvalmix=Clarity_Compare(scan,D=datarawD,Dnew=datamixD)
@@ -503,7 +503,7 @@ plot.ClarityScanSignificance<-function(x,...){
 #' @param xpd (default=NA) how to protect plotting outside of the region; see \code{\link{par}}(xpd).
 #' @param text (default=c("Significant","Not Significant")) what to write as the legends.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' scan=Clarity_Scan(dataraw) ## Core Clarity
 #'
 #' ## Plot persistence chart with p-values
@@ -589,7 +589,7 @@ c_getplotval <- function (x,i,clist,default){
 #' @return an invisble list of the used plot symbols for each curve
 #' @seealso \code{\link{plot.ClarityScan}} for the main plotting interface for persistences.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' scan=Clarity_Scan(dataraw) ## Core Clarity
 #' predmix=Clarity_Predict(datamix,scan) ## Core prediction
 #' predrep=Clarity_Predict(datarep,scan) 
