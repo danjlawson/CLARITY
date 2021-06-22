@@ -195,7 +195,7 @@ c_crossvalidate=function(datalist,kmax=NULL,...){
 #' @param clearned A Clarity or ClarityScan object, from which inference will be drawn. If a ClarityScan object and \code{k} is not set, persistences are examined; otherwise residuals are examined.
 #' @param Ynew (default=NULL) The new (dis)similarity matrix to be compared. Can instead provide \code{Dnew} and \code{Ynew} will be computed.
 #' @param Dnew (default=NULL) Optionally, the new data to be compared. Will be used to construct \code{Ynew} (with \code{distfn}) if that is not provided; otherwise it will be checked for consistency.
-#' @param H0 (default="structure") The null hypothesis to be tested. The default test is that the "structure" has changed. Can also be set to "value" in which case no rotation to \code{Y} is done, or "scale" in which case the matrices are rescaled to match by mean value only. (Acts only to set the \code{transform}.)
+#' @param H0 (default="value") The null hypothesis to be tested. (Acts only to set the \code{transform}, as specified in the "transform" parameter.
 #' @param D (default=NULL) The *original* data feature matrix. If provided, the features will be resampled to generate replicated datasets and hence (with \code{distfn}) a list of resampled dis/similarity matrices \code{Ylist}.
 #' @param Ylist (default=NULL) A list of replicated dis/similarity matrices. Provide them this way if it is more convenient.
 #' @param distfn (default=c_dist) Distance function to apply to \code{Dnew} and replicates of \code{D} to produce \code{Ynew} and \code{Ylist}.
@@ -318,7 +318,6 @@ Clarity_Compare <- function(clearned,
     }
 
     YnewT=transform(Ynew,clearned$Y)
-    print(YnewT)
     pred=Clarity_Predict(YnewT,clearned)
     
     ### Construct the list of resampled data
