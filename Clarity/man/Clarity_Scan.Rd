@@ -11,7 +11,7 @@ Clarity_Scan(Y, kmax = 20, method = "SVDX", clist = NULL, verbose = TRUE, ...)
 
 \item{kmax}{(default: 20): The maximum number of mixture components to be considered. All values less than this are explored}
 
-\item{method}{(Default: "SVD") Fuzzy matched to either "SVD" or "Multiplicative"}
+\item{method}{(Default: "SVD") Fuzzy matched to: "SVD","SVDX","pSVD","pSVDX", "SVDmix" or "Multiplicative"}
 
 \item{clist}{(Default: NULL, meaning start from scratch) A previously learned  "ClarityScan" object. Useful for adding additional iterations to \code{\link{Clarity_Multiplicative_Scan}}.}
 
@@ -37,6 +37,8 @@ Several methods are available:
 \itemize{
 \item "SVDX": A fast method that provides high quality predictions and zero fuss. Uses \code{\link{c_simpleSVD_Scan}} and can tolerate asymmetric Y.
 \item "SVD": A fast method that provides high quality predictions and zero fuss. Uses \code{\link{c_simpleSVD_Scan}} using the SVD singluar value matrix for X, assuming symmetry.
+\item "pSVDX": As "SVDX" but removes any diagonal residuals from Y by 
+\item "pSVD": A fast method that provides high quality predictions and zero fuss. Uses \code{\link{c_simpleSVD_Scan}} using the SVD singluar value matrix for X, assuming symmetry.
 \item "SVDmix": A relatively fast method that provides high quality predictions based on forming a mixture around an SVD. Uses \code{\link{c_SVD_Scan}}.
 \item "Multiplicative": A slower method that tries to find a minimum volume encolosing simplex for the data, making the output into a legititate mixture solution with additional assumptions. Uses \code{\link{Clarity_Multiplicative_Scan}}.
 }

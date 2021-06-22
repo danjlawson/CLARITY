@@ -208,6 +208,7 @@ Clarity_fixedK <- function(Y,k,method="SVDX",verbose=TRUE,...){
 #' @param Ynew The data to be predicted
 #' @param clist The learned Clarity object, either of class "Clarity" or of class "ClarityScan"
 #' @param Ysvd Default NULL. SVD of Y, which is needed for the method="SVD". You can provide it or it will be computed for you when using this method. NB: It should be the SVD of Y-rowMeans(Y) to remove the mean effect, as computed by \code{\link{c_svd}}.
+#' @param ... Additional arguments to \code{\link{c_svdlist}}, if the original method used this.
 #' 
 #' @keywords mixture
 #' @return An object of the same class as clist provided, with updated Y, X and derived features.
@@ -222,11 +223,16 @@ Clarity_fixedK <- function(Y,k,method="SVDX",verbose=TRUE,...){
 #' # Apply it to a new dataset with slightly different structure
 #' scanmixfromraw=Clarity_Predict(datamix,clist=scanraw) 
 #' }
-Clarity_Predict<-function(Ynew,clist,Ysvd=NULL) {
+Clarity_Predict<-function(Ynew,clist,Ysvd=NULL,...) {
     if(is(clist,"ClarityScan")) {
-        if(is.null(Ysvd)) Ysvd=c_svd(Ynew)
         ret=list()
-        ret$scan=lapply(clist$scan,Clarity_Predict,Ynew=Ynew,Ysvd=Ysvd)
+        if(is(clist$Ysvd,"SVDlist")){
+            if(all(is.null(Ysvd))) Ysvd=c_svdlist(Ynew,length(clist$scan),...)
+            ret$scan=lapply(1:length(clist$scan),function(i) Clarity_Predict(clist$scan[[i]],Ynew=Ysvd[[i]]$Yp,Ysvd=Ysvd[[i]]$Yp.svd))
+        }else{
+            if(is.null(Ysvd)) Ysvd=c_svd(Ynew)
+            ret$scan=lapply(clist$scan,Clarity_Predict,Ynew=Ynew,Ysvd=Ysvd)
+        }
         ret$objectives=sapply(ret$scan,function(x)x$objective)
         ret$klist=clist$klist
         ret$Y=Ynew
@@ -308,13 +314,15 @@ Clarity_Extend <- function(clist,kmax=10,
 #' \itemize{
 #' \item "SVDX": A fast method that provides high quality predictions and zero fuss. Uses \code{\link{c_simpleSVD_Scan}} and can tolerate asymmetric Y.
 #' \item "SVD": A fast method that provides high quality predictions and zero fuss. Uses \code{\link{c_simpleSVD_Scan}} using the SVD singluar value matrix for X, assuming symmetry.
+#' \item "pSVDX": As "SVDX" but removes any diagonal residuals from Y by 
+#' \item "pSVD": A fast method that provides high quality predictions and zero fuss. Uses \code{\link{c_simpleSVD_Scan}} using the SVD singluar value matrix for X, assuming symmetry.
 #' \item "SVDmix": A relatively fast method that provides high quality predictions based on forming a mixture around an SVD. Uses \code{\link{c_SVD_Scan}}.
 #' \item "Multiplicative": A slower method that tries to find a minimum volume encolosing simplex for the data, making the output into a legititate mixture solution with additional assumptions. Uses \code{\link{Clarity_Multiplicative_Scan}}.
 #' }
 #' 
 #' @param Y The similarity or distance matrix to be fitted. In principle any square matrix is allowed but algorithmically you may have problems if it is non-negative or rank-deficient.
 #' @param kmax (default: 20): The maximum number of mixture components to be considered. All values less than this are explored
-#' @param method (Default: "SVD") Fuzzy matched to either "SVD" or "Multiplicative"
+#' @param method (Default: "SVD") Fuzzy matched to: "SVD","SVDX","pSVD","pSVDX", "SVDmix" or "Multiplicative"
 #' @param clist (Default: NULL, meaning start from scratch) A previously learned  "ClarityScan" object. Useful for adding additional iterations to \code{\link{Clarity_Multiplicative_Scan}}.
 #' @param verbose (default: TRUE) verbose output?
 #' @param ... additional parameters to the methods; principally tuning parameters for  \code{\link{Clarity_Multiplicative_Scan}}.
@@ -329,7 +337,6 @@ Clarity_Extend <- function(clist,kmax=10,
 #' \item kmax The maximum K requested
 #' \item ... Additional method-specific details (e.g. Ysvd for method="SVD")
 #' }
-
 #' @seealso  \code{\link{Clarity_fixedK}} for the details of what a "Clarity" object is. \code{\link{Clarity_Predict}} to make an initial prediction of the new data. \code{\link{plot.ClarityScan}} for plotting, \code{\link{Clarity_Compare}} for quantifying uncertainty. \code{\link{Clarity_ObjectivePlot}} for comparing quality of fit as a function of \code{k}.
 #' @export
 #' @examples
@@ -355,7 +362,7 @@ Clarity_Scan <- function(Y, kmax =20,
     if(!is.null(clist)) {
         method=clist$method
     }else{
-        method=c_argmatch(method,c("SVD","SVDX","SVDmix","Multiplicative"))
+        method=c_argmatch(method,c("SVD","SVDX","pSVD","pSVDX","SVDmix","Multiplicative"))
     }
     if(method=="SVDmix"){
         clist=c_SVD_Scan(Y,kmax,clist,verbose=verbose,...)
@@ -363,6 +370,10 @@ Clarity_Scan <- function(Y, kmax =20,
         clist=c_simpleSVD_Scan(Y,kmax,clist,verbose=verbose,Xtype="Sigma",...)
     }else if(method=="SVDX"){
         clist=c_simpleSVD_Scan(Y,kmax,clist,verbose=verbose,Xtype="X",...)
+    }else if(method=="pSVD"){
+        clist=c_nodiagSVD_Scan(Y,kmax,clist,verbose=verbose,Xtype="Sigma",...)
+    }else if(method=="pSVDX"){
+        clist=c_nodiagSVD_Scan(Y,kmax,clist,verbose=verbose,Xtype="X",...)
     }else if(method=="Multiplicative"){
         clist=Clarity_Multiplicative_Scan(Y,kmax,clist,verbose=verbose,...)
     }else{

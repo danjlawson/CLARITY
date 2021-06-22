@@ -278,7 +278,7 @@ Clarity_Compare <- function(clearned,
     }else if (is(clearned,"Clarity")){
         k=clearned$k
         kmax=NULL
-        if(verbose) cat(paste0("Working with Residuals as provided with a Clarity object at k=",k,"in clearned.\n"))
+        if(verbose) cat(paste0("Working with Residuals as provided with a Clarity object at k=",k," in clearned.\n"))
     }else{
         stop("Error: Invalid class of clearned object. Must be Clarity or ClarityScan")
     }
@@ -312,7 +312,13 @@ Clarity_Compare <- function(clearned,
         }
     }
 
+#### Check dimensions
+    if (any(dim(Ynew) != dim(clearned$Y))) {
+        stop(paste("Error: Provided data has dimension",dim(Ynew)[1],"compared to clarity object dimension",dim(clearned$Y)[1]))
+    }
+
     YnewT=transform(Ynew,clearned$Y)
+    print(YnewT)
     pred=Clarity_Predict(YnewT,clearned)
     
     ### Construct the list of resampled data

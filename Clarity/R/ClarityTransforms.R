@@ -27,8 +27,8 @@ c_Center <- function (Y, col = TRUE, row = TRUE, method = "mean",na.rm=TRUE)
 {
     ret = Y
     if (col) {
-        Cn1 = c_getC(dim(Y)[1])
         if (method == "matrix") {
+            Cn1 = c_getC(dim(Y)[1])
             ret = Cn1 %*% Y
         }
         else if (method == "mean") {
@@ -37,8 +37,8 @@ c_Center <- function (Y, col = TRUE, row = TRUE, method = "mean",na.rm=TRUE)
         else stop("Invalid method: must be \"matrix\" or \"mean\"")
     }
     if (row) {
-        Cn2 = c_getC(dim(Y)[2])
         if (method == "matrix") {
+            Cn2 = c_getC(dim(Y)[2])
             ret = ret %*% Cn2
         }
         else if (method == "mean") {

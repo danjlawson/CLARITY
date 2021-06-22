@@ -148,7 +148,7 @@ Clarity_Chart<-function(x,
                 graphics::mtext(side=taxis,at=1:dim(x)[1],
                                 line=1,las=las.axis,
                                 text=rownames(x),las=las.axis,
-                                cex.axis=cex.axis.X,col=col.axis.X)
+                                cex=cex.axis.X,col=col.axis.X)
             }
         }
         if(cex.axis.Y>0){
@@ -161,7 +161,7 @@ Clarity_Chart<-function(x,
                 graphics::mtext(side=2,at=1:dim(x)[2],
                                 line=1,las=las.axis,
                                 text=colnames(x),las=las.axis,
-                                cex.axis=cex.axis.Y,
+                                cex=cex.axis.Y,
                                 col=col.axis.Y)
             }
         }
