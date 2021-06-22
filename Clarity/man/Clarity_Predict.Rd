@@ -4,7 +4,7 @@
 \alias{Clarity_Predict}
 \title{Predict one Similarity from a Clarity or ClarityScan object}
 \usage{
-Clarity_Predict(Ynew, clist, Ysvd = NULL)
+Clarity_Predict(Ynew, clist, Ysvd = NULL, ...)
 }
 \arguments{
 \item{Ynew}{The data to be predicted}
@@ -12,6 +12,8 @@ Clarity_Predict(Ynew, clist, Ysvd = NULL)
 \item{clist}{The learned Clarity object, either of class "Clarity" or of class "ClarityScan"}
 
 \item{Ysvd}{Default NULL. SVD of Y, which is needed for the method="SVD". You can provide it or it will be computed for you when using this method. NB: It should be the SVD of Y-rowMeans(Y) to remove the mean effect, as computed by \code{\link{c_svd}}.}
+
+\item{...}{Additional arguments to \code{\link{c_svdlist}}, if the original method used this.}
 }
 \value{
 An object of the same class as clist provided, with updated Y, X and derived features.

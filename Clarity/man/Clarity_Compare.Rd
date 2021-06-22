@@ -28,7 +28,7 @@ Clarity_Compare(
 
 \item{Dnew}{(default=NULL) Optionally, the new data to be compared. Will be used to construct \code{Ynew} (with \code{distfn}) if that is not provided; otherwise it will be checked for consistency.}
 
-\item{H0}{(default="structure") The null hypothesis to be tested. The default test is that the "structure" has changed. Can also be set to "value" in which case no rotation to \code{Y} is done, or "scale" in which case the matrices are rescaled to match by mean value only. (Acts only to set the \code{transform}.)}
+\item{H0}{(default="value") The null hypothesis to be tested. (Acts only to set the \code{transform}, as specified in the "transform" parameter.}
 
 \item{Ylist}{(default=NULL) A list of replicated dis/similarity matrices. Provide them this way if it is more convenient.}
 

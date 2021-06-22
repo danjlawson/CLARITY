@@ -4,7 +4,7 @@
 \alias{c_IterativeSVD}
 \title{Iteratively apply an SVD to remove the effect of diagonals}
 \usage{
-c_IterativeSVD(Y, K, Tmax = 25, tol = 1e-05)
+c_IterativeSVD(Y, K, Tmax = 25, tol = 1e-05, verbose = FALSE)
 }
 \arguments{
 \item{Y}{The similarity data}
@@ -14,11 +14,14 @@ c_IterativeSVD(Y, K, Tmax = 25, tol = 1e-05)
 \item{Tmax}{(Default: 25) Maximum number of iterations to process. Typically converges quite quickly.}
 
 \item{tol}{(Default: 1e-5) Tolerance of the difference in the sum of the residuals on the diagonal.}
+
+\item{verbose}{(Default: FALSE) Whether to report progress}
 }
 \value{
 A list containing:
 \itemize{
 \item Yp.svd: the SVD object of (Y-diag(D));
+\item Yp: Yprime = Y-diag(D);
 \item D: the estimated D;
 \item K: the provided K;
 \item Dhistory: a matrix of dimension (t times n) of the diagonals at each iteration i;

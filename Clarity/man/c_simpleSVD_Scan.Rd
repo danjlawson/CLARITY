@@ -11,7 +11,7 @@ c_simpleSVD_Scan(Y, kmax = NULL, Ysvd = NULL, verbose = TRUE, Xtype = "X")
 
 \item{kmax}{(default: NULL, meaning use the data dimension) the maximum number of mixture components to use}
 
-\item{Ysvd}{(default: NULL, meaning calculate it) the SVD of Y. If you provide a different object containing locations in the list Ysvd$u, they will be used instead. IMPORTANT: Ysvd$d must be rotated to ensure that Ysvd$u = Ysvd$v}
+\item{Ysvd}{(default: NULL, meaning calculate it) the SVD of Y. If you provide a different object containing locations in the list Ysvd$u, they will be used instead. IMPORTANT: Ysvd$d must be rotated to ensure that Ysvd$u = Ysvd$v, as done by \code{\link{c_svd0}}.}
 
 \item{verbose}{(default TRUE) whether to output progress to the terminal.}
 

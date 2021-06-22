@@ -97,7 +97,7 @@ c_simpleSVD_Scan <- function(Y,kmax=NULL,Ysvd=NULL,verbose=TRUE,Xtype="X"){
 #' @param K The SVD complexity to retain
 #' @param Tmax (Default: 25) Maximum number of iterations to process. Typically converges quite quickly.
 #' @param tol (Default: 1e-5) Tolerance of the difference in the sum of the residuals on the diagonal.
-#' @param verblse (Default: FALSE) Whether to report progress
+#' @param verbose (Default: FALSE) Whether to report progress
 #' 
 #' @return  A list containing:
 #' \itemize{
@@ -240,7 +240,7 @@ c_svd0 <-function(Y){
 #' @param tol (default: 1e-5) As passed to \code{\link{c_IterativeSVD}}.
 #' @param verbose (default TRUE) whether to output progress to the terminal.
 #' 
-#' @return A SVDlist object, which is a list of length kmax of SVDs as returned by \code{\link{c_IterativeSV}}
+#' @return A SVDlist object, which is a list of length kmax of SVDs as returned by \code{\link{c_IterativeSVD}}
 #' @seealso \code{\link{Clarity_Scan}} for the recommended interface.
 #' @export
 #' 
