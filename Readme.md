@@ -15,7 +15,12 @@ Clarity offers tools to rapidly perform the graph comparison, to identify nodes 
 
 ## Installation
 
-Installation should be straightforward:
+We provide two packages:
+
+* [Clarity](Clarity), which is an inference framework, and
+* [ClaritySim](ClaritySim), which is a simulation tool for this framework.
+
+Both are installed with the following command:
 
 ```R
 remotes::install_github("danjlawson/CLARITY/Clarity")
@@ -43,7 +48,7 @@ The file [makeclarity.R](makeclarity.R) provides the code that generated the exa
 
 ## Citation
 
-Currently cite the package with `citation("Clarity")`. A paper is under submission.
+Currently cite the package with `citation("Clarity")`.
 
 ## License and Authors
 
