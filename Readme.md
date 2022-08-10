@@ -2,6 +2,8 @@
 
 ## Overview
 
+See the paper titled [CLARITY: comparing heterogeneous data using dissimilarity](https://royalsocietypublishing.org/doi/10.1098/rsos.202182) for more details.
+
 Clarity is an R package for comparing matrices in terms of their *structure*. If the matrices represent dissimilarities between objects, then the matrix can be decomposed into a **structure** and a **relationship** matrix, in the manner of Non-negative Matrix Factorization. Each object is represented in terms of:
 
 * the **Structure**: the topology of a graph (mixture of trees) that generates the objects in a latent space
